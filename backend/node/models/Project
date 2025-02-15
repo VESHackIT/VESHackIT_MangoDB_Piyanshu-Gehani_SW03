@@ -9,6 +9,7 @@ const projectSchema = new mongoose.Schema(
     raisedAmount: { type: Number, default: 0 }, // Current investment
     founder: { type: mongoose.Schema.Types.ObjectId, ref: "Founder", required: true },
     investors: [{ type: mongoose.Schema.Types.ObjectId, ref: "Investor" }], // Multiple investors
+    sustainability_score: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
