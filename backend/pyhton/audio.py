@@ -46,27 +46,50 @@ def transcribe():
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    """Summarize and analyze sentiment of transcribed text using Ollama's Llama 3 model."""
+    """Summarize, analyze sentiment, and provide suggestions for improving a pitch deck or eco project."""
     data = request.get_json()
     if "text" not in data:
         return jsonify({"error": "No text provided"}), 400
     
     text = data["text"]
-    print("text hereeeeeeeeee",text)
-
+    
     # Summarization
-    summary_prompt = f"Summarize this text: {text}"
+    summary_prompt = f"Summarize this pitch discussion: {text}"
     summary_response = ollama.generate(model="llama3.2:3b", prompt=summary_prompt)
-    summary = summary_response["response"]
+    summary = summary_response["response"].strip()
 
     # Sentiment Analysis
-    sentiment_prompt = f"Analyze the sentiment of this text: {text}. Reply only with POSITIVE, NEGATIVE, or NEUTRAL."
+    sentiment_prompt = f"Analyze the sentiment of this discussion: {text}. Reply only with POSITIVE, NEGATIVE, or NEUTRAL."
     sentiment_response = ollama.generate(model="llama3.2:3b", prompt=sentiment_prompt)
-    sentiment = sentiment_response["response"]
+    sentiment = sentiment_response["response"].strip().upper()
+
+    # Conditional Suggestions (Restrict to 100 words)
+    if sentiment == "POSITIVE":
+        suggestion = "Your pitch is already strong! Keep up the great work and focus on scaling your impact."
+    else:
+        suggestion_prompt = f"""
+        Based on the following pitch discussion, suggest **improvements** for the founder's deck and eco project:
+        
+        - Identify weak points in their pitch.
+        - Suggest ways to make the impact stronger.
+        - Recommend areas where they can refine their business strategy.
+        
+        Text: {text}
+
+        **Limit your response to 100 words.**
+        """
+        suggestion_response = ollama.generate(model="llama3.2:3b", prompt=suggestion_prompt)
+        suggestion = suggestion_response["response"].strip()
+
+        # Trim suggestion to 100 words if needed
+        words = suggestion.split()
+        if len(words) > 100:
+            suggestion = " ".join(words[:100]) + "..."
 
     return jsonify({
-        "summary": summary.strip(),
-        "sentiment": sentiment.strip()
+        "summary": summary,
+        "sentiment": sentiment,
+        "suggestions": suggestion
     })
 
 if __name__ == "__main__":

@@ -140,6 +140,26 @@ export default function Layout() {
             headerShown: false,
           }}
         />
+        <Tabs.Screen
+          name="rewards"
+          options={{
+            tabBarIcon: ({ color }) => (
+              <View
+                style={{
+                  backgroundColor:
+                    color === theme.primary
+                      ? theme.primaryTransparent
+                      : "transparent",
+                  borderRadius: 10,
+                  padding: 4, // Reduced padding to 4 from 6
+                }}
+              >
+                <Ionicons name="trophy" color={color} size={22} />
+              </View>
+            ),
+            tabBarLabel: "Home",
+          }}
+        />
       </Tabs>
       <StatusBar backgroundColor={theme.background} style="light" />
     </>
