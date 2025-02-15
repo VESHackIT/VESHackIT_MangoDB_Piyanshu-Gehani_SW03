@@ -14,5 +14,5 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "nativewind-env.d.ts"
-, "components/ProjectCarousel.tsx"  ]
+, "components/ProjectCarousel.tsx", "app/(tabs)/home.jsx"  ]
 }
