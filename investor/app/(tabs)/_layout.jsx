@@ -133,10 +133,10 @@ export default function Layout() {
                   padding: 4, // Reduced padding to 4 from 6
                 }}
               >
-                <Ionicons name="wallet" color={color} size={22} />
+                <Ionicons name="person" color={color} size={22} />
               </View>
             ),
-            tabBarLabel: "Wallet",
+            tabBarLabel: "Account",
             headerShown: false,
           }}
         />
