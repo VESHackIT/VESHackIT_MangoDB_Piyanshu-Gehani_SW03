@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Chakra imports
-import { Box, Button, Flex, Grid, Icon, Image, Spacer, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Grid, Icon, Image, Spacer, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, VStack, Divider, Spinner } from "@chakra-ui/react";
 
 // Custom components
 import Card from "components/Card/Card.js";
@@ -13,6 +13,7 @@ import CustomScheduleModal from "./CustomScheduleModal";
 
 
 // Icons
+import { FaPlay } from "react-icons/fa";
 import earthImg from "./../../assets/earth.jpg"
 import { FaPencilAlt, FaRegCalendarAlt } from "react-icons/fa";
 import { IoEllipsisHorizontalSharp } from "react-icons/io5";
@@ -56,8 +57,43 @@ const updatesData = [
 ];
 
 function Dashboard() {
+	// Sample Data
+	const meeting = [
+		{
+			id: 1,
+			title: "Investor Meeting",
+			sentiment: "Positive",
+			date: "2024-02-15",
+			startTime: "10:00 AM",
+			endTime: "11:30 AM",
+			keyPoints: ["Market expansion", "Funding update", "Next steps"],
+			videoUrl: "https://youtu.be/j1HbiaMVvWI?si=fU7-5jYXKpLSrdYn"
+		}
+	];
+
+	const [isOpen, setIsOpen] = useState(false);
+	const [isPlaying, setIsPlaying] = useState(false);
+
+	const openModal = () => setIsOpen(true);
+	const closeModal = () => {
+		setIsOpen(false);
+		setIsPlaying(false);
+	};
+
 	const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 	const [founderData, setFounderData] = useState(null);
+
+
+	const [loading, setLoading] = useState(false);
+	const [summary, setSummary] = useState(null);
+	const [transcript, setTranscript] = useState(null);
+	const [sentiment, setSentiment] = useState(null);
+
+	const transcriptData = `John: Let's start with project updates. How's the API development going?
+Emma: We’ve completed the user authentication module, and now working on database optimization.
+Michael: Great! Next, let’s discuss the upcoming sprint tasks.
+Sarah: We need to finalize the UI components and integrate the new API endpoints.
+John: Sounds good. Let’s set a deadline for next week and track progress daily.`;
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -70,6 +106,8 @@ function Dashboard() {
 				console.error("Error fetching data:", error);
 			}
 		};
+
+
 
 		fetchData();
 	}, []);
@@ -85,10 +123,31 @@ function Dashboard() {
 	const totalRaised = founderData?.projects.reduce((sum, project) => sum + project.raisedAmount, 0);
 	const successfulProjects = founderData.projects.filter(
 		(project) => project.raisedAmount >= project.fundingGoal
-	  ).length;
+	).length;
 	const successRate = founderData.projects.length > 0 ? (successfulProjects / founderData.projects.length) * 100 : 0;
-	  
-	
+
+
+
+	const handleGenerate = async () => {
+		setLoading(true);
+		try {
+			const response = await fetch("http://127.0.0.1:5005/analyze", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ text: transcriptData }),
+			});
+
+			const data = await response.json();
+			setSummary(data.summary);
+			//   setTranscript(data.transcript);
+			setSentiment(data.sentiment);
+		} catch (error) {
+			console.error("Error fetching summary:", error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 
 	return (
 		<Flex direction='column' pt={{ base: "120px", md: "75px" }} mx='auto'>
@@ -182,64 +241,64 @@ function Dashboard() {
 
 						{/* Project Stats */}
 						<Card
-              p="16px"
-              backgroundImage="linear-gradient(127.09deg, #000000 19.41%, #000000 76.65%)"
-              backgroundRepeat="no-repeat"
-              bgSize="cover"
-              bgPosition="center"
-              borderRadius="lg"
-              boxShadow="lg"
-            >
-              <CardBody h="100%" w="100%">
-                <Flex direction="column" color="white" h="100%" p="0px 10px 20px 10px" w="100%">
-                  {/* Founder Rating Section */}
-                  <Flex justify="space-between" align="center">
-                    <Text fontSize="lg" fontWeight="bold" textTransform="uppercase" letterSpacing="wide">
-                      Founder Rating
-                    </Text>
-                    <Text fontSize="2xl" fontWeight="bold" color="green.400">
-                      ⭐ 4.7 / 5
-                    </Text>
-                  </Flex>
+							p="16px"
+							backgroundImage="linear-gradient(127.09deg, #000000 19.41%, #000000 76.65%)"
+							backgroundRepeat="no-repeat"
+							bgSize="cover"
+							bgPosition="center"
+							borderRadius="lg"
+							boxShadow="lg"
+						>
+							<CardBody h="100%" w="100%">
+								<Flex direction="column" color="white" h="100%" p="0px 10px 20px 10px" w="100%">
+									{/* Founder Rating Section */}
+									<Flex justify="space-between" align="center">
+										<Text fontSize="lg" fontWeight="bold" textTransform="uppercase" letterSpacing="wide">
+											Founder Rating
+										</Text>
+										<Text fontSize="2xl" fontWeight="bold" color="green.400">
+											⭐ 4.7 / 5
+										</Text>
+									</Flex>
 
-                  <Spacer />
+									<Spacer />
 
-                  {/* Active Projects & Key Stats */}
-                  <Flex direction="column">
-                    <Box>
-                      <Text fontSize="sm" color="gray.400" fontWeight="medium">
-                        Active Projects
-                      </Text>
-                      <Text fontSize="xl" fontWeight="bold" letterSpacing="wide">
-                        🚀 {founderData.projects.length} Projects
-                      </Text>
-                    </Box>
+									{/* Active Projects & Key Stats */}
+									<Flex direction="column">
+										<Box>
+											<Text fontSize="sm" color="gray.400" fontWeight="medium">
+												Active Projects
+											</Text>
+											<Text fontSize="xl" fontWeight="bold" letterSpacing="wide">
+												🚀 {founderData.projects.length} Projects
+											</Text>
+										</Box>
 
-                    <Flex mt="16px">
-                      {/* Total Raised */}
-                      <Flex direction="column" me="34px">
-                        <Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
-                          Total Raised
-                        </Text>
-                        <Text fontSize="lg" fontWeight="bold" color="green.400">
-                          💰 ${totalRaised}
-                        </Text>
-                      </Flex>
+										<Flex mt="16px">
+											{/* Total Raised */}
+											<Flex direction="column" me="34px">
+												<Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
+													Total Raised
+												</Text>
+												<Text fontSize="lg" fontWeight="bold" color="green.400">
+													💰 ${totalRaised}
+												</Text>
+											</Flex>
 
-                      {/* Success Rate */}
-                      <Flex direction="column">
-                        <Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
-                          Success Rate
-                        </Text>
-                        <Text fontSize="lg" fontWeight="bold" color="green.400">
-                          📈 {successRate.toFixed(0)}%
-                        </Text>
-                      </Flex>
-                    </Flex>
-                  </Flex>
-                </Flex>
-              </CardBody>
-            </Card>
+											{/* Success Rate */}
+											<Flex direction="column">
+												<Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
+													Success Rate
+												</Text>
+												<Text fontSize="lg" fontWeight="bold" color="green.400">
+													📈 {successRate.toFixed(0)}%
+												</Text>
+											</Flex>
+										</Flex>
+									</Flex>
+								</Flex>
+							</CardBody>
+						</Card>
 
 
 						{/* AI Insights */}
@@ -256,8 +315,8 @@ function Dashboard() {
 											Average Project Score
 										</Text>
 										<Text color='#fff' fontWeight='bold' fontSize='34px'>
-										{founderData.projects.length > 0 ? 
-                        (founderData.projects.reduce((sum, project) => sum + project.sustainability_score, 0) / founderData.projects.length).toFixed(0) + '%' : 'N/A'}
+											{founderData.projects.length > 0 ?
+												(founderData.projects.reduce((sum, project) => sum + project.sustainability_score, 0) / founderData.projects.length).toFixed(0) + '%' : 'N/A'}
 										</Text>
 									</Flex>
 									<Flex direction='column'>
@@ -300,7 +359,7 @@ function Dashboard() {
 										</Flex>
 									</Flex>
 									<Text color='#fff' fontSize='sm' fontWeight='bold'>
-									92%
+										92%
 									</Text>
 								</Flex>
 							</Flex>
@@ -327,48 +386,48 @@ function Dashboard() {
 								direction='column'
 								w='100%'>
 								{founderData.projects.map((project, index) => (
-                  <GradientBorder
-                    mb='24px'
-                    w='100%'
-                    borderRadius='20px'
-                    key={index}>
-                    <Flex
-                      p='22px'
-                      bg="linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)"
-                      borderRadius='20px'
-                      width='100%'>
-                      <Flex direction='column' flex='1'>
-                        <Text color='#fff' fontSize='md' fontWeight='bold' mb='10px'>
-                          {project.name}
-                        </Text>
-                        <Flex justify='space-between' mb='10px'>
-                          <Text color='gray.400' fontSize='sm'>
-                            Raised:
-                          </Text>
-                          <Text color='#fff' fontSize='sm'>
-                            ${project.raisedAmount.toLocaleString()}/${project.fundingGoal.toLocaleString()}
-                          </Text>
-                        </Flex>
-                        <Flex justify='space-between'>
-                          <Text color='gray.400' fontSize='sm'>
-                            Sustainability Score:
-                          </Text>
-                          <Text color='#fff' fontSize='sm'>
-                            {project.sustainability_score}%
-                          </Text>
-                        </Flex>
-                      </Flex>
-                      <Flex align='center' ml='20px'>
-                        <Text
-                          color={project.raisedAmount >= project.fundingGoal ? 'green.400' : 'yellow.400'}
-                          fontSize='sm'
-                          fontWeight='bold'>
-                          {project.raisedAmount >= project.fundingGoal ? 'Active' : 'Pending'}
-                        </Text>
-                      </Flex>
-                    </Flex>
-                  </GradientBorder>
-                ))}
+									<GradientBorder
+										mb='24px'
+										w='100%'
+										borderRadius='20px'
+										key={index}>
+										<Flex
+											p='22px'
+											bg="linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)"
+											borderRadius='20px'
+											width='100%'>
+											<Flex direction='column' flex='1'>
+												<Text color='#fff' fontSize='md' fontWeight='bold' mb='10px'>
+													{project.name}
+												</Text>
+												<Flex justify='space-between' mb='10px'>
+													<Text color='gray.400' fontSize='sm'>
+														Raised:
+													</Text>
+													<Text color='#fff' fontSize='sm'>
+														${project.raisedAmount.toLocaleString()}/${project.fundingGoal.toLocaleString()}
+													</Text>
+												</Flex>
+												<Flex justify='space-between'>
+													<Text color='gray.400' fontSize='sm'>
+														Sustainability Score:
+													</Text>
+													<Text color='#fff' fontSize='sm'>
+														{project.sustainability_score}%
+													</Text>
+												</Flex>
+											</Flex>
+											<Flex align='center' ml='20px'>
+												<Text
+													color={project.raisedAmount >= project.fundingGoal ? 'green.400' : 'yellow.400'}
+													fontSize='sm'
+													fontWeight='bold'>
+													{project.raisedAmount >= project.fundingGoal ? 'Active' : 'Pending'}
+												</Text>
+											</Flex>
+										</Flex>
+									</GradientBorder>
+								))}
 							</Flex>
 						</CardBody>
 					</Card>
@@ -425,40 +484,130 @@ function Dashboard() {
 									RECENT MEETINGS
 								</Text>
 								{founderData.meetings.map((meeting, index) => (
-                  <GradientBorder mb='20px' borderRadius='20px' key={index}>
-                    <Flex
-                      bg='linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)'
-                      p='16px'
-                      borderRadius='20px'
-                      direction='column'>
-                      <Flex justify='space-between' mb='10px'>
-                        <Text color='#fff' fontSize='sm' fontWeight='bold'>
-                          {meeting.title}
-                        </Text>
-                        <Text color={meeting.sentiment === 'Positive' ? 'green.400' : meeting.sentiment === 'Neutral' ? 'yellow.400' : 'red.400'} fontSize='xs'>
-                          {meeting.sentiment} Sentiment
-                        </Text>
-                      </Flex>
-                      <Text color='gray.400' fontSize='xs' mb='10px'>
-                        {new Date(meeting.date).toLocaleDateString()}, {meeting.startTime} - {meeting.endTime}
-                      </Text>
-                      <Box p='10px' borderRadius='10px'>
-                        <Text color='gray.300' fontSize='xs'>
-                          Key Points: {meeting.keyPoints.join(', ')}
-                        </Text>
-                      </Box>
-                      <Flex mt='10px' justify='flex-end'>
-                        <Button variant='outline' size='sm' style={{
-                          backgroundColor: "transparent",
-                          borderColor: "white",
-                          color: "white"
-                        }}>
-                          View Recording
-                        </Button>
-                      </Flex>
-                    </Flex>
-                  </GradientBorder>
-                ))}
+									<GradientBorder mb='20px' borderRadius='20px' key={index}>
+										<Flex
+											bg='linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)'
+											p='16px'
+											borderRadius='20px'
+											direction='column'>
+											<Flex justify='space-between' mb='10px'>
+												<Text color='#fff' fontSize='sm' fontWeight='bold'>
+													{meeting.title}
+												</Text>
+												<Text color={meeting.sentiment === 'Positive' ? 'green.400' : meeting.sentiment === 'Neutral' ? 'yellow.400' : 'red.400'} fontSize='xs'>
+													{meeting.sentiment} Sentiment
+												</Text>
+											</Flex>
+											<Text color='gray.400' fontSize='xs' mb='10px'>
+												{new Date(meeting.date).toLocaleDateString()}, {meeting.startTime} - {meeting.endTime}
+											</Text>
+											<Box p='10px' borderRadius='10px'>
+												<Text color='gray.300' fontSize='xs'>
+													Key Points: {meeting.keyPoints.join(', ')}
+												</Text>
+											</Box>
+											<Flex mt='10px' justify='flex-end'>
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={openModal}
+													style={{
+														backgroundColor: "transparent",
+														borderColor: "white",
+														color: "white"
+													}}
+												>
+													View Recording
+												</Button>
+											</Flex>
+										</Flex>
+									</GradientBorder>
+								))}
+								{/* Video & Sentiment Modal */}
+								<Modal isOpen={isOpen} onClose={closeModal} size="6xl">
+									<ModalOverlay />
+									<ModalContent bg="rgba(10, 10, 10, 0.95)" borderRadius="20px">
+										<ModalHeader color="white">Meeting Recording</ModalHeader>
+										<ModalCloseButton color="white" />
+										<ModalBody>
+											<Flex gap={6}>
+												{/* Left: Video Player */}
+												<Box flex="1" position="relative" borderRadius="10px" overflow="hidden">
+													<video
+														style={{
+															width: "100%",
+															height: "95%", // Ensures it takes full height
+															minHeight: "200px", // Sets a minimum height
+															borderRadius: "10px",
+															cursor: "pointer",
+															objectFit: "cover", // Prevents stretching
+														}}
+														controls
+														poster="https://via.placeholder.com/640x360.png?text=Meeting+Recording"
+													>
+														<source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+														Your browser does not support the video tag.
+													</video>
+												</Box>
+
+
+												{/* Right: Sentiment & Summary */}
+												<Box flex="1" p="16px">
+													<Text color="white" fontSize="lg" fontWeight="bold">
+														Weekly Team Sync
+													</Text>
+													{/* Sentiment Analysis (Visible after API Response) */}
+													{sentiment && (
+														<Text
+															color={sentiment === "Positive" ? "green.400" : sentiment === "Negative" ? "red.400" : "yellow.400"}
+															fontSize="md"
+															mb="4"
+														>
+															Sentiment: {sentiment} 
+														</Text>
+													)}
+
+													{/* Generate Button */}
+													<Button
+														mt="4"
+														bg="#00b890"
+														onClick={handleGenerate}
+														isDisabled={loading}
+													>
+														{loading ? <Spinner size="sm" /> : "Generate Summary & Transcripts"}
+													</Button>
+
+													{/* Summary Section (Visible after API Response) */}
+													{summary && (
+														<Box mt="4" p="3" border="1px solid gray" borderRadius="10px">
+															<Text color="white" fontSize="md" fontWeight="bold">
+																Summary:
+															</Text>
+															<Text color="gray.300" fontSize="sm">{summary}</Text>
+														</Box>
+													)}
+												</Box>
+											</Flex>
+											<Divider my="6" borderColor="gray.600" />
+
+											{/* Transcript Section (Visible after API Response) */}
+											{summary && (
+												<VStack align="stretch" spacing={3} p="3">
+													<Text color="white" fontSize="md" fontWeight="bold">
+														Transcript:
+													</Text>
+													<Box p="3" border="1px solid gray" borderRadius="10px">
+
+														<Text color="gray.300" fontSize="sm">
+															{transcriptData}
+														</Text>
+
+													</Box>
+												</VStack>
+											)}
+										</ModalBody>
+									</ModalContent>
+								</Modal>
 							</Box>
 
 							{/* Founder Achievements - Gamification */}
@@ -549,11 +698,11 @@ function Dashboard() {
 					</CardBody>
 				</Card>
 			</Grid>
-			
-<CustomScheduleModal
-  isOpen={isScheduleModalOpen}
-  onClose={() => setIsScheduleModalOpen(false)}
-/>
+
+			<CustomScheduleModal
+				isOpen={isScheduleModalOpen}
+				onClose={() => setIsScheduleModalOpen(false)}
+			/>
 		</Flex>
 	);
 }

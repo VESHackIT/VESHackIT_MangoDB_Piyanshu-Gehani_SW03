@@ -139,6 +139,8 @@ const createMeeting = async (req, res) => {
       founder: founder._id,
       investors: investors.map((inv) => inv._id),
       sentiment: "Neutral" // Default value
+      summary: "", // Default value
+      transcripts: "", // Default value
     });
 
     await meeting.save(); // Save the meeting explicitly
