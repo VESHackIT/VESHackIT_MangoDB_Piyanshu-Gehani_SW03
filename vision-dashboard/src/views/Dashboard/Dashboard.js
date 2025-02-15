@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // Chakra imports
-import { Box, Button, Flex, Grid, Icon, Image, Spacer, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, VStack, Divider, Spinner } from "@chakra-ui/react";
+import { Box, Button, Flex, Grid, Icon, Image, Spacer, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, VStack, Divider, Spinner, FormControl, FormLabel, Input, Textarea, ModalFooter, useToast } from "@chakra-ui/react";
 
 import { motion } from "framer-motion";
 // Custom components
@@ -58,6 +58,10 @@ const updatesData = [
 ];
 
 function Dashboard() {
+	const [isPitchDeckValid, setIsPitchDeckValid] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState(null);
+  const toast = useToast();
+
 	const [rotating, setRotating] = useState(null);
 	const badges = [
 		{ value: "150+", label: "Community Backers", color: "blue.300" },
@@ -81,6 +85,83 @@ function Dashboard() {
 
 	const [isOpen, setIsOpen] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [projectOpen, setProjectOpen] = useState(false);
+  const [projectData, setProjectData] = useState({
+    name: "",
+    description: "",
+    fundingGoal: "",
+    pitchDeck: null,
+  });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProjectData((prev) => ({ ...prev, [name]: value }));
+  };
+  const verifyPitchDeck = async () => {
+    if (!projectData.pitchDeck) {
+      toast({
+        title: "No file uploaded.",
+        description: "Please upload a pitch deck to verify.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Simulating verification process (replace with real API call)
+    setVerificationStatus("loading");
+
+    setTimeout(() => {
+      const isValid = projectData.pitchDeck.name.endsWith(".pdf"); // Simple check (can be extended)
+      if (isValid) {
+        setIsPitchDeckValid(true);
+        setVerificationStatus("success");
+        toast({
+          title: "Pitch Deck Verified!",
+          description: "Your document is valid and ready to submit.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        setVerificationStatus("error");
+        toast({
+          title: "Invalid Pitch Deck!",
+          description: "Please upload a valid PDF document.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    }, 2000);
+  };
+
+
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setProjectData((prev) => ({ ...prev, pitchDeck: file }));
+    setIsPitchDeckValid(false);
+    setVerificationStatus(null);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!isPitchDeckValid) {
+      toast({
+        title: "Verification Required!",
+        description: "Please verify your pitch deck before submitting.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    console.log("Project Data:", projectData);
+    setProjectOpen(false);
+  };
+
+
 
 	const openModal = () => setIsOpen(true);
 	const closeModal = () => {
@@ -90,8 +171,6 @@ function Dashboard() {
 
 	const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 	const [founderData, setFounderData] = useState(null);
-
-
 	const [loading, setLoading] = useState(false);
 	const [summary, setSummary] = useState(null);
 	const [transcript, setTranscript] = useState(null);
@@ -279,6 +358,8 @@ John: Sounds good. Let’s set a deadline for next week and track progress daily
 											<Text fontSize="sm" color="gray.400" fontWeight="medium">
 												Active Projects
 											</Text>
+											
+											
 											<Text fontSize="xl" fontWeight="bold" letterSpacing="wide">
 												🚀 {founderData.projects.length} Projects
 											</Text>
@@ -386,6 +467,9 @@ John: Sounds good. Let’s set a deadline for next week and track progress daily
 								<Text fontSize='lg' color='#fff' fontWeight='bold'>
 									Active Projects
 								</Text>
+								<Button onClick={() => setProjectOpen(true)} fontSize='15px' colorScheme="brand">
+        New Project
+      </Button>
 								{/* <Button maxW='135px' fontSize='10px' variant='brand'>
                   NEW PROJECT
                 </Button> */}
@@ -720,6 +804,81 @@ John: Sounds good. Let’s set a deadline for next week and track progress daily
 				isOpen={isScheduleModalOpen}
 				onClose={() => setIsScheduleModalOpen(false)}
 			/>
+			
+			<Modal isOpen={projectOpen} onClose={() => setProjectOpen(false)} size="lg">
+        <ModalOverlay />
+        <ModalContent bg="linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)" color="white">
+          <ModalHeader fontSize="2xl" fontWeight="bold" textAlign="center">
+            🚀 Launch Your Dream Project!
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={5} align="stretch">
+              <FormControl isRequired>
+                <FormLabel fontWeight="semibold">🌟 Project Name</FormLabel>
+                <Input
+                  name="name"
+                  value={projectData.name}
+                  onChange={handleChange}
+                  placeholder="Give your project an exciting name..."
+                  focusBorderColor="green.400"
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel fontWeight="semibold">📖 Project Description</FormLabel>
+                <Textarea
+                  name="description"
+                  value={projectData.description}
+                  onChange={handleChange}
+                  placeholder="Describe your vision and impact..."
+                  focusBorderColor="green.400"
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel fontWeight="semibold">💰 Funding Goal ($)</FormLabel>
+                <Input
+                  type="number"
+                  name="fundingGoal"
+                  value={projectData.fundingGoal}
+                  onChange={handleChange}
+                  placeholder="How much funding do you need?"
+                  focusBorderColor="green.400"
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel fontWeight="semibold">📂 Upload Pitch Deck (PDF)</FormLabel>
+                <Input type="file" accept="application/pdf" onChange={handleFileChange} p={1} />
+              </FormControl>
+
+              <Button bg="gray.800" onClick={verifyPitchDeck} isLoading={verificationStatus === "loading"}>
+                Verify Pitch Deck
+              </Button>
+
+              {verificationStatus === "success" && <Text color="green.400">✔️ Pitch Deck Verified!</Text>}
+              {verificationStatus === "error" && <Text color="red.400">❌ Invalid Pitch Deck. Upload a valid PDF.</Text>}
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={() => setProjectOpen(false)} color="gray.300" _hover={{ color: "white" }}>
+              Cancel
+            </Button>
+            <Button 
+              colorScheme="green" 
+              fontWeight="bold" 
+              onClick={handleSubmit}
+              isDisabled={!isPitchDeckValid}
+              _hover={{ transform: "scale(1.05)", transition: "0.2s ease-in-out" }}
+            >
+              Submit Project
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+			
 		</Flex>
 	);
 }
