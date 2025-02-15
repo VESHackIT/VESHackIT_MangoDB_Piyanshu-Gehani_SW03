@@ -1,0 +1,35 @@
+/* Ensure the main calendar has a black background */
+.react-calendar {
+    background-color: #0A0A0A !important;
+    border: 1px solid #4B5563;
+    border-radius: 8px;
+    color: white;
+  }
+  
+  /* Ensure all date tiles have a dark background */
+  .react-calendar__tile {
+    background: #1A1A1A !important; /* Dark background */
+    color: white !important;
+    transition: background 0.2s ease-in-out;
+  }
+  
+  /* Hover effect */
+  .react-calendar__tile:hover {
+    background: #00AA77 !important;
+  }
+  
+  /* Selected date styling */
+  .react-calendar__tile--active {
+    background: #333333 !important;
+    color: white !important;
+  }
+  
+  /* Forcefully override past disabled dates */
+  .react-calendar__tile--disabled,
+  .react-calendar__tile--now[disabled] {
+    background: #111111 !important;  /* Dark background for past dates */
+    color: #666666 !important;       /* Gray text */
+    pointer-events: none;            /* Prevent clicking */
+    opacity: 0.5;                    /* Slightly faded */
+  }
+  
