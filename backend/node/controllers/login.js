@@ -1,5 +1,4 @@
 const User = require("../models/User");
-
 const createUser = async (req, res) => {
   try {
     const exists = await User.findOne({ email: req.body.email });
@@ -43,4 +42,9 @@ const findUser = async (req, res) => {
     return res.status(500).json({ err });
   }
 };
+
+
+
+
+
 module.exports = { createUser, findUser };

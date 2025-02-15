@@ -1,20 +1,18 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
   Image,
-  FlatList,
-  Dimensions,
   StyleSheet,
-  TouchableOpacity,
   Animated,
+  Dimensions,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = width * 0.8; // Card size
-const CARD_MARGIN = 15; // Margin between cards
-const ITEM_SIZE = CARD_WIDTH + CARD_MARGIN * 2; // Total item width
-
+const CARD_WIDTH = width * 0.8;
+const CARD_MARGIN = 8;
+const ITEM_SIZE = CARD_WIDTH + CARD_MARGIN * 2;
+const SPACER = (width - CARD_WIDTH - CARD_MARGIN) / 2;
 
 const data = [
   {
@@ -24,7 +22,7 @@ const data = [
     funded: 7500,
     goal: 10000,
     supporters: 320,
-    image: 'https://d382rz2cea0pah.cloudfront.net/wp-content/uploads/2024/12/Major-Events-that-Impacted-the-Indian-Solar-Sector-in-2024.jpg',
+    image: 'https://images.unsplash.com/photo-1484399172022-72a90b12e3c1',
   },
   {
     id: '2',
@@ -33,7 +31,7 @@ const data = [
     funded: 5400,
     goal: 8000,
     supporters: 210,
-    image: 'https://d382rz2cea0pah.cloudfront.net/wp-content/uploads/2024/12/Major-Events-that-Impacted-the-Indian-Solar-Sector-in-2024.jpg',
+    image: 'https://images.unsplash.com/photo-1464790719320-516ecd75af6c',
   },
   {
     id: '3',
@@ -42,7 +40,7 @@ const data = [
     funded: 6800,
     goal: 12000,
     supporters: 410,
-    image: 'https://d382rz2cea0pah.cloudfront.net/wp-content/uploads/2024/12/Major-Events-that-Impacted-the-Indian-Solar-Sector-in-2024.jpg',
+    image: 'https://images.unsplash.com/photo-1504439468489-c8920d796a29',
   },
   {
     id: '4',
@@ -51,199 +49,210 @@ const data = [
     funded: 9200,
     goal: 15000,
     supporters: 500,
-    image: 'https://d382rz2cea0pah.cloudfront.net/wp-content/uploads/2024/12/Major-Events-that-Impacted-the-Indian-Solar-Sector-in-2024.jpg',
+    image: 'https://images.unsplash.com/photo-1536939459926-301728717817',
   },
 ];
 
 const ProjectCarousel = () => {
-  const flatListRef = useRef<FlatList>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleScroll = (index: number) => {
-    flatListRef.current?.scrollToIndex({ index, animated: true });
-    setCurrentIndex(index);
-  };
+  const scrollX = useRef(new Animated.Value(0)).current;
 
   return (
     <View style={styles.container}>
-      <FlatList
-  ref={flatListRef}
-  data={data}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  pagingEnabled
-  snapToInterval={ITEM_SIZE}
-  snapToAlignment="center"
-  decelerationRate="fast"
-  keyExtractor={(item) => item.id}
-  getItemLayout={(data, index) => ({
-    length: ITEM_SIZE,
-    offset: ITEM_SIZE * index,
-    index,
-  })}
-  scrollEventThrottle={16} // Smoother scrolling experience
-  onScroll={(event) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offsetX / ITEM_SIZE);
-    setCurrentIndex(newIndex);
-  }}
-  onMomentumScrollEnd={(event) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offsetX / ITEM_SIZE);
-    setCurrentIndex(newIndex);
-  }}
-  renderItem={({ item, index }) => {
-    const isActive = index === currentIndex;
-    const progress = (item.funded / item.goal) * 100;
-    return (
-      <Animated.View
-        style={[
-          styles.card,
-          {
-            transform: [
-              { scale: isActive ? 1 : 0.8 },
-              { perspective: 1000 },
-              { rotateY: isActive ? '0deg' : '15deg' },
-            ],
-            opacity: isActive ? 1 : 0.7,
-          },
-        ]}
-      >
-        <Image source={{ uri: item.image }} style={styles.image} />
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.description}>{item.description}</Text>
+      <Animated.FlatList
+        data={data}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={ITEM_SIZE}
+        decelerationRate="fast"
+        keyExtractor={(item) => item.id}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: true }
+        )}
+        contentContainerStyle={{
+          paddingHorizontal: SPACER,
+          paddingVertical: 40, // Add padding to account for the scale/translateY animations
+        }}
+        renderItem={({ item, index }) => {
+          const inputRange = [
+            (index - 1) * ITEM_SIZE,
+            index * ITEM_SIZE,
+            (index + 1) * ITEM_SIZE,
+          ];
 
-        {/* Funding Progress Bar */}
-        <View style={styles.progressBar}>
-          <View style={[styles.progress, { width: `${progress}%` }]} />
-        </View>
-        <Text style={styles.fundingText}>
-          ${item.funded} raised of ${item.goal}
-        </Text>
+          const scale = scrollX.interpolate({
+            inputRange,
+            outputRange: [0.9, 1.05, 0.9],
+            extrapolate: 'clamp',
+          });
 
-        <Text style={styles.supporters}>{item.supporters} supporters</Text>
-      </Animated.View>
-    );
-  }}
-/>
+          const translateY = scrollX.interpolate({
+            inputRange,
+            outputRange: [15, -30, 15],
+            extrapolate: 'clamp',
+          });
 
+          const opacity = scrollX.interpolate({
+            inputRange,
+            outputRange: [0.7, 1, 0.7],
+            extrapolate: 'clamp',
+          });
 
-      {/* Navigation Buttons
-      <View style={styles.buttons}>
-        <TouchableOpacity
-          disabled={currentIndex === 0}
-          onPress={() => handleScroll(currentIndex - 1)}
-          style={[styles.button, currentIndex === 0 && styles.disabledButton]}
-        >
-          <Text style={styles.buttonText}>{'<'}</Text>
-        </TouchableOpacity>
+          const rotateX = scrollX.interpolate({
+            inputRange,
+            outputRange: ['20deg', '0deg', '20deg'],
+            extrapolate: 'clamp',
+          });
 
-        <TouchableOpacity
-          disabled={currentIndex === data.length - 1}
-          onPress={() => handleScroll(currentIndex + 1)}
-          style={[styles.button, currentIndex === data.length - 1 && styles.disabledButton]}
-        >
-          <Text style={styles.buttonText}>{'>'}</Text>
-        </TouchableOpacity>
-      </View> */}
+          return (
+            <Animated.View
+              style={[
+                styles.card,
+                {
+                  transform: [
+                    { perspective: 1000 },
+                    { scale },
+                    { translateY },
+                    { rotateX },
+                  ],
+                  opacity,
+                },
+              ]}
+            >
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: item.image }} style={styles.image} />
+                <View style={styles.supportersBadge}>
+                  <Text style={styles.supportersText}>
+                    {item.supporters} supporters
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.contentContainer}>
+                <Text className='font-psemibold' style={styles.title}>{item.title}</Text>
+                <Text style={styles.description}>{item.description}</Text>
+
+                <View style={styles.progressContainer}>
+                  <View style={styles.progressInfo}>
+                    <Text style={styles.fundingAmount}>
+                      ${item.funded.toLocaleString()}
+                    </Text>
+                    <Text style={styles.fundingGoal}>
+                      of ${item.goal.toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View
+                      style={[
+                        styles.progress,
+                        { width: `${(item.funded / item.goal) * 100}%` },
+                      ]}
+                    />
+                  </View>
+                </View>
+              </View>
+            </Animated.View>
+          );
+        }}
+      />
     </View>
   );
 };
 
-export default ProjectCarousel;
-
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 40, 
+    height: 500, // Increased height to accommodate the animated scaling and translation
+    marginTop: 0, // Removed top margin as we're using paddingVertical in FlatList
+    marginLeft: -16,
+    marginRight: -16,
+    marginBottom: -80,
   },
   card: {
     width: CARD_WIDTH,
-    height: 300,
-    backgroundColor: '#131d2a',
-    color: '#fff',  
+    height: 380,
+    backgroundColor: '#1a2a38',
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 40,
     marginHorizontal: CARD_MARGIN,
-    elevation: 6, // Android Shadow
-    shadowColor: '#000', // iOS Shadow
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 180,
+    backgroundColor: '#243447',
   },
   image: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    marginBottom: 10,
-  },
-  name: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    marginTop: 10,
-    color: '#fff',
-  },
-  occupation: {
-    fontSize: 15,
-    fontStyle: 'italic',
-    color: '#777',
-  },
-  buttons: {
-    flexDirection: 'row',
-    marginTop: 25,
-  },
-  button: {
-    borderColor: '#fff',
-    borderWidth: 1,
-    padding: 12,
-    borderRadius: 12,
-    marginHorizontal: 12,
-  },
-  disabledButton: {
-    backgroundColor: '#1A1F2E',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  fundingText: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    marginTop: 5,
-    color: '#888',
-  },
-  supporters: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 3,
-  },
-  progressBar: {
     width: '100%',
-    height: 8,
-    backgroundColor: '#ddd',
-    borderRadius: 5,
-    overflow: 'hidden',
-    marginTop: 10,
-  },
-  progress: {
     height: '100%',
-    backgroundColor: '#00b8a0', // Green color
+    resizeMode: 'cover',
+  },
+  contentContainer: {
+    padding: 20,
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#fff',
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
   description: {
     fontSize: 14,
-    color: '#555',
-    textAlign: 'center',
-    marginVertical: 5,
+    color: '#a0aec0',
+    lineHeight: 20,
+    marginBottom: 20,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  progressContainer: {
+    width: '100%',
+  },
+  progressInfo: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 8,
+  },
+  fundingAmount: {
     color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginRight: 4,
+  },
+  fundingGoal: {
+    color: '#718096',
+    fontSize: 14,
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progress: {
+    height: '100%',
+    backgroundColor: '#4ade80',
+    borderRadius: 3,
+  },
+  supportersBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  supportersText: {
+    color: '#1a2a38',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
+
+export default ProjectCarousel;
