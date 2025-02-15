@@ -84,7 +84,7 @@ export default function Home() {
   });
 
   return (
-    <SafeAreaView className="flex-1 pt-24 bg-background">
+    <SafeAreaView className="flex-1 pt-12 bg-background">
       <StatusBar barStyle="light-content" />
       <Animated.View style={headerStyle}>
         <LinearGradient
