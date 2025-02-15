@@ -9,6 +9,8 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import GradientBorder from "components/GradientBorder/GradientBorder";
 import IconBox from "components/Icons/IconBox";
+import CustomScheduleModal from "./CustomScheduleModal";
+
 
 // Icons
 import earthImg from "./../../assets/earth.jpg"
@@ -54,6 +56,7 @@ const updatesData = [
 ];
 
 function Dashboard() {
+	const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 	const [founderData, setFounderData] = useState(null);
 
 	useEffect(() => {
@@ -84,6 +87,7 @@ function Dashboard() {
 		(project) => project.raisedAmount >= project.fundingGoal
 	  ).length;
 	const successRate = founderData.projects.length > 0 ? (successfulProjects / founderData.projects.length) * 100 : 0;
+	  
 	
 
 	return (
@@ -405,6 +409,7 @@ function Dashboard() {
 										borderColor: "white",
 
 									}}
+									onClick={() => setIsScheduleModalOpen(true)}
 								>
 									SCHEDULE MEETING
 								</Button>
@@ -544,6 +549,11 @@ function Dashboard() {
 					</CardBody>
 				</Card>
 			</Grid>
+			
+<CustomScheduleModal
+  isOpen={isScheduleModalOpen}
+  onClose={() => setIsScheduleModalOpen(false)}
+/>
 		</Flex>
 	);
 }

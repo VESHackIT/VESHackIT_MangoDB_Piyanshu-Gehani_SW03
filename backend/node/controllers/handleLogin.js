@@ -5,22 +5,27 @@ const Meeting = require("../models/Meeting");
 
 const createProject = async (req, res) => {
   try {
-
-    // Find the founder
-    const founder = await Founder.findOne({ name: req.body.founderName });
-
+    const founderName = req.body.founderName;
+    const founder = await Founder.findOne({ name: founderName });
     if (!founder) {
       return res.status(404).json({ error: "Founder not found" });
     }
+
     const founderId = founder._id;
     const project = await Project.create({ ...req.body, founder: founderId });
-    // const project = await Project.create(req.body);
+
+    // Recalculate impact_score for the founder
+    const newImpactScore = founder.projects.length * 10 + project.fundingGoal; // Example scoring logic
+    founder.impact_score = newImpactScore;
+
+    // Add project ID to founder's projects array
+    founder.projects.push(project._id);
+    await founder.save();
+
     return res.status(201).json({ project });
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ err: err.message || "Internal Server Error" });
+    return res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 };
 
