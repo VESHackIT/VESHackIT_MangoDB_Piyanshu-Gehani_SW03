@@ -131,10 +131,10 @@ export default function Dashboard() {
 												size={200}
 												value={85}
 												thickness={6}
-												color='#00b38c'
+												color='brand.400'
 												variant='vision'>
 												<CircularProgressLabel>
-													<IconBox mb='20px' mx='auto' bg='brand.200' borderRadius='50%' w='48px' h='48px'>
+													<IconBox mb='20px' mx='auto' borderRadius='50%' w='48px' h='48px'>
 														<Icon as={BiHappy} color='#fff' w='30px' h='30px' />
 													</IconBox>
 												</CircularProgressLabel>
@@ -213,7 +213,7 @@ export default function Dashboard() {
 													size={window.innerWidth >= 1024 ? 200 : window.innerWidth >= 768 ? 170 : 200}
 													value={75}
 													thickness={6}
-													color='#05CD99'
+													color='yellow.500'
 													variant='vision'>
 													<CircularProgressLabel>
 														<Flex direction='column' justify='center' align='center'>
@@ -222,7 +222,7 @@ export default function Dashboard() {
 															</Text>
 															<Text
 																color='#fff'
-																fontSize={{ md: '36px', lg: '50px' }}
+																fontSize={{ md: '20px', lg: '20px' }}
 																fontWeight='bold'
 																mb='4px'>
 																75%
