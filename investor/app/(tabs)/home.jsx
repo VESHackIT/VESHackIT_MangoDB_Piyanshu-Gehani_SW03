@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
   Text,
   SafeAreaView,
-  StatusBar
+  StatusBar,
+  TouchableOpacity,
+  Modal,
+  Alert
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -35,7 +38,31 @@ const CustomCard = ({ children, className = '' }) => (
 );
 
 export default function Home() {
+  const WEBHOOK_URL = 'https://piyanshu.app.n8n.cloud/webhook/7e474783-7445-43b6-a753-c9ce141e082c';
   const scrollY = useSharedValue(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const handleConfirm = async () => {
+    try {
+      await fetch('https://piyanshu.app.n8n.cloud/webhook/7e474783-7445-43b6-a753-c9ce141e082c', {
+        method: 'POST',
+      });
+
+      Alert.alert('Success', `Event added for ${selectedDate}`);
+      setModalVisible(false);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add event');
+    }
+  };
+
+  const busyDates = {
+    '2025-02-10': { selected: true, selectedColor: "#064e3b" },
+    '2025-02-15': { selected: true, selectedColor: "#064e3b" },
+    // '2025-02-20': { selected: true, selectedColor: "#064e3b" },
+  };
+  
+
 
   const portfolioStats = {
     totalInvested: 250000,
@@ -101,7 +128,7 @@ export default function Home() {
 
         <View className="px-5">
           {/* Invested Projects Section */}
-          <View className="mt-4 mb-6">
+          <View className="mt-4 mb-2">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-xl font-bold" style={{ color: COLORS.text }}>
                 Invested Projects
@@ -120,28 +147,67 @@ export default function Home() {
             <View className="flex-row items-center justify-between mb-4">
               <View>
                 <Text className="text-white/60 text-sm mb-1">Total Impact</Text>
-                <Text className="text-lg font-bold" style={{ color: COLORS.text }}>
-                  Carbon Impact
-                </Text>
+                <Text className="text-lg font-bold text-white">Carbon Impact</Text>
               </View>
-              <View className="bg-[#00b890] bg-opacity-20 px-3 py-1 rounded-full">
+              <View className="bg-[#00b890]/20 px-3 py-1 rounded-full">
                 <Text className="text-[#00b890] font-medium">+12.5%</Text>
               </View>
             </View>
-            <LineChartComponent />
-          </CustomCard>
 
-          {/* Calendar Component */}
-          <CustomCard className="mb-6">
-            <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-bold" style={{ color: COLORS.text }}>
-                Upcoming Meetings
-              </Text>
-              <View className="bg-white/10 px-3 py-1 rounded-full">
-                <Text className="text-white/60">February</Text>
-              </View>
+            {/* Chart Container with Overflow Handling */}
+            <View className="w-full overflow-hidden">
+              <LineChartComponent className="w-full" />
             </View>
+          </CustomCard>
+          {/* Calendar Section */}
+        <View className="mt-6 mb-4">
+          <Text className="text-xl font-bold mb-2" style={{ color: COLORS.text }}>
+            Upcoming Meetings
+          </Text>
+          <Calendar
+  theme={{
+    backgroundColor: COLORS.surface,
+    calendarBackground: COLORS.surface,
+    textSectionTitleColor: 'rgba(255,255,255,0.6)',
+    selectedDayBackgroundColor: COLORS.primary,
+    selectedDayTextColor: '#ffffff',
+    todayTextColor: COLORS.primary,
+    dayTextColor: COLORS.text,
+    arrowColor: COLORS.primary,
+    monthTextColor: COLORS.text,
+    textDisabledColor: 'rgba(255,255,255,0.2)',
+  }}
+  markedDates={busyDates}
+/>
+
+        </View>
+
+        {/* Add Event Button */}
+        <TouchableOpacity
+          className="bg-[#00b890] p-3 rounded-lg mb-4"
+          onPress={() => setModalVisible(true)}
+        >
+          <Text className="text-white text-center font-bold">Add Event</Text>
+        </TouchableOpacity>
+        </View>
+      </ScrollView>
+       {/* Event Popup Modal */}
+       <Modal
+        animationType="slide"
+        transparent
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-[#131d2a] p-6 rounded-lg w-4/5">
+            <Text className="text-lg font-bold mb-2 text-white">Select Event Date</Text>
+
             <Calendar
+              onDayPress={(day) => setSelectedDate(day.dateString)}
+              markedDates={{
+                ...busyDates,
+                [selectedDate]: { selected: true, selectedColor: COLORS.primary },
+              }}
               theme={{
                 backgroundColor: COLORS.surface,
                 calendarBackground: COLORS.surface,
@@ -153,17 +219,29 @@ export default function Home() {
                 arrowColor: COLORS.primary,
                 monthTextColor: COLORS.text,
                 textDisabledColor: 'rgba(255,255,255,0.2)',
-                dotColor: COLORS.primary,
-                selectedDotColor: '#ffffff',
-              }}
-              markedDates={{
-                '2025-02-20': { selected: true, marked: true, dotColor: COLORS.primary },
-                '2025-02-25': { marked: true, dotColor: COLORS.primary },
               }}
             />
-          </CustomCard>
+
+            {/* Confirmation Buttons */}
+            <View className="flex-row justify-between mt-4">
+              <TouchableOpacity
+                className="bg-red-500 px-4 py-2 rounded-lg"
+                onPress={() => setModalVisible(false)}
+              >
+                <Text className="text-white">Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="bg-[#00b890] px-4 py-2 rounded-lg"
+                onPress={handleConfirm}
+                disabled={!selectedDate}
+              >
+                <Text className="text-white">Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </ScrollView>
+      </Modal>
     </SafeAreaView>
   );
 }

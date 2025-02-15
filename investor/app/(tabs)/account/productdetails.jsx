@@ -16,7 +16,7 @@ const mockProduct = [
       _id: "60d21b4667d0d8992e610c85",
       name: "Portable Solar Power Bank",
       price: 129.99,
-      image: "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      image: "https://tse4.mm.bing.net/th?id=OIP.qr4HLOel4qHrYqrZ-amupgHaHa&pid=Api&P=0&h=180",
       category: "Solar",
       description: "This high-capacity solar power bank allows you to charge your devices anywhere using clean solar energy. Features include fast charging, multiple USB ports, LED light, and weather-resistant design. Perfect for camping, hiking, or emergency backup power.",
       features: [
