@@ -83,7 +83,15 @@ const getFounder = async (req, res) => {
   }
 };
 
-
+const getAllProjects = async (req, res) => {
+  try {
+    const projects = await Project.find().select("-__v -updatedAt");
+    return res.status(200).json({ projects });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ err: err.message || "Internal Server Error" });
+  }
+};
 
 const createInvestor = async (req, res) => {
   try {
@@ -171,4 +179,5 @@ module.exports = {
   createInvestor,
   getInvestor,
   createMeeting,
+  getAllProjects
 };

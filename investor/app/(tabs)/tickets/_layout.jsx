@@ -15,6 +15,12 @@ export default function TravelLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="open"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

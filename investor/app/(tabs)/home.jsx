@@ -128,7 +128,7 @@ export default function Home() {
 
         <View className="px-5">
           {/* Invested Projects Section */}
-          <View className="mt-4 mb-6">
+          <View className="mt-4 mb-2">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-xl font-bold" style={{ color: COLORS.text }}>
                 Invested Projects
@@ -147,15 +147,17 @@ export default function Home() {
             <View className="flex-row items-center justify-between mb-4">
               <View>
                 <Text className="text-white/60 text-sm mb-1">Total Impact</Text>
-                <Text className="text-lg font-bold" style={{ color: COLORS.text }}>
-                  Carbon Impact
-                </Text>
+                <Text className="text-lg font-bold text-white">Carbon Impact</Text>
               </View>
-              <View className="bg-[#00b890] bg-opacity-20 px-3 py-1 rounded-full">
+              <View className="bg-[#00b890]/20 px-3 py-1 rounded-full">
                 <Text className="text-[#00b890] font-medium">+12.5%</Text>
               </View>
             </View>
-            <LineChartComponent />
+
+            {/* Chart Container with Overflow Handling */}
+            <View className="w-full overflow-hidden">
+              <LineChartComponent className="w-full" />
+            </View>
           </CustomCard>
           {/* Calendar Section */}
         <View className="mt-6 mb-4">

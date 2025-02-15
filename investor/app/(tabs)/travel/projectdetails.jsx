@@ -7,7 +7,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome5 } from "@expo/vector-icons"; 
 import { Linking, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
-
+import React, { useEffect, useState } from "react";
 const impactIcons = {
   carbonReduction: { icon: "cloud", color: "#4CAF50" }, // Green
   householdsBenefited: { icon: "home", color: "#3F51B5" }, // Blue
@@ -24,8 +24,8 @@ const theme = {
 };
 const contact = {
   email: "example@example.com",
-  linkedin: "https://www.linkedin.com/in/example",
-  instagram: "https://www.instagram.com/example",
+  linkedin: "https://www.linkedin.com/company/solar-energy-projects-zw",
+  instagram: "https://www.instagram.com/primegridsolar",
 };
 // Dummy Data (same as before)
 const dummyProjects = {
@@ -82,18 +82,42 @@ const openSocialLink = async (url) => {
 };
 
 const ProjectDetails = () => {
-  const { id } = useLocalSearchParams();
-  const project = dummyProjects[id];
+  const { name } = useLocalSearchParams();
+  const [project, setProject] = useState(null);
+  
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const response = await fetch(`http://192.168.39.152:5001/login/project/${name}`);
+        const data = await response.json();
+  
+        if (response.ok && data.project) {
+          setProject(data.project); // ✅ Set project using nested object
+        } else {
+          console.error("Project not found:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+      }
+    };
+  
+    if (name) {
+     
+      fetchProject();
+    }
+  }, [name]);
+  
+
 
   if (!project) {
     return (
-      <View className="flex-1 justify-center items-center p-4 bg-gray-100">
+      <View className="flex-1 justify-center items-center bg-gray-100">
         <Text className="text-lg font-bold text-red-500">Project Not Found</Text>
       </View>
     );
   }
 
-  const progress = project.raisedAmount / project.targetAmount;
+  const progress = project.raisedAmount / project.fundingGoal;
 const renderProgressBar = (progress) => {
     return (
       <View style={styles.customProgressContainer}>
@@ -107,7 +131,7 @@ const renderProgressBar = (progress) => {
       {/* Hero Section with Faded Image */}
       <View className="relative rounded-b-3xl overflow-hidden">
         <ImageBackground
-          source={{ uri: project.imageUrl }}
+          source={{ uri: project.imageUri }}
           className="w-full h-72"
           resizeMode="cover"
         >
@@ -121,7 +145,7 @@ const renderProgressBar = (progress) => {
         <View className="absolute bottom-0 left-0 right-0 px-5 pb-6">
           <Text className="text-3xl font-pbold text-white shadow-text">{project.name}</Text>
           <View className="flex-row items-center mt-1">
-            <Text className="text-sm text-white mr-2">📍 {project.location}</Text>
+            <Text className="text-sm text-white mr-2">📍 Mumbai, Maharashtra</Text>
           </View>
         </View>
       </View>
@@ -137,7 +161,7 @@ const renderProgressBar = (progress) => {
                           <Text
                             style={[styles.targetAmount, { color: theme.inactive }]}
                           >
-                            / ₹{project.targetAmount.toLocaleString()}
+                            / ₹{project.fundingGoal.toLocaleString()}
                           </Text>
                         </View>
         
@@ -147,7 +171,7 @@ const renderProgressBar = (progress) => {
                           <View style={styles.timeRemaining}>
                             <Icon name="clock" size={12} color={theme.inactive} />
                             <Text style={[styles.daysLeft, { color: theme.inactive }]}>
-                              {project.daysLeft} days left
+                              15 days left
                             </Text>
                           </View>
         
@@ -176,7 +200,7 @@ const renderProgressBar = (progress) => {
                             <Text
                               style={[styles.investorCount, { color: theme.inactive }]}
                             >
-                              {project.investors[project.investors.length - 1]}
+                              +220 others
                             </Text>
                           </View>
                         </View>
@@ -189,7 +213,7 @@ const renderProgressBar = (progress) => {
           onPress={() => {
             router.push({
               pathname: "/(tabs)/travel/routescreen",
-              params: { id: project._id }
+            
             });
             }}
           >
@@ -208,7 +232,7 @@ const renderProgressBar = (progress) => {
         <Text className="text-xl font-pbold text-white my-5">Project Impact</Text>
         {/* Impact Metrics Cards */}
         <View className="flex-row flex-wrap justify-between">
-          {Object.entries(project.impactMetrics).map(([key, value]) => (
+          {Object.entries(dummyProjects["650f94bfc7e89f001d1e4e5a"].impactMetrics).map(([key, value]) => (
             <View 
               key={key} 
               style={[styles.card, { backgroundColor: theme.surface }]} 
@@ -238,13 +262,13 @@ const renderProgressBar = (progress) => {
         <View className="pb-3">
           <Text className="text-xl font-bold text-white mb-3">Contact for More Info</Text>
           <View className="flex-row items-center gap-x-4">
-            <TouchableOpacity onPress={() => openSocialLink(project.contact.email ? `mailto:${project.contact.email}` : "#")}>
+            <TouchableOpacity onPress={() => openSocialLink(contact.email ? `mailto:${contact.email}` : "#")}>
               <FontAwesome name="envelope" size={24} color="gray" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => openSocialLink(project.contact.linkedin)}>
+            <TouchableOpacity onPress={() => openSocialLink(contact.linkedin)}>
               <FontAwesome name="linkedin" size={24} color="#0077b5" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => openSocialLink(project.contact.instagram)}>
+            <TouchableOpacity onPress={() => openSocialLink(contact.instagram)}>
               <FontAwesome name="instagram" size={24} color="#C13584" />
             </TouchableOpacity>
           </View>
