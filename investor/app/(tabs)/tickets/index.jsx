@@ -5,17 +5,17 @@ import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 
 // Renewable energy focused dummy data
 const INVESTED_PROJECTS = [
-  { 
-    id: 1, 
-    title: 'Solar Farm Initiative', 
+  {
+    id: 1,
+    title: 'Solar Farm Initiative',
     description: 'Community-funded 50MW solar power plant in Nevada',
     amount: '$150,000',
     founder: 'Green Energy Collective',
     photo: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
   },
-  { 
-    id: 2, 
-    title: 'Wind Turbine Project', 
+  {
+    id: 2,
+    title: 'Wind Turbine Project',
     description: 'Offshore wind energy generation for coastal cities',
     amount: '$200,000',
     founder: 'EcoPower Solutions',
@@ -68,7 +68,7 @@ export default function CommunitySection() {
   });
 
   const toggleLike = (id) => {
-    setCommunityDiscussions(prevDiscussions => 
+    setCommunityDiscussions(prevDiscussions =>
       prevDiscussions.map(discussion => {
         if (discussion.id === id) {
           return {
@@ -105,7 +105,11 @@ export default function CommunitySection() {
   };
 
   const DiscussionCard = ({ discussion }) => (
-    <TouchableOpacity className="rounded-xl mb-4 overflow-hidden p-4" style={{ backgroundColor: discussion.bgColor }}>
+    <TouchableOpacity
+      className="rounded-xl mb-4 overflow-hidden p-4"
+      style={{ backgroundColor: discussion.bgColor }}
+      onPress={() => router.push({ pathname: '/tickets/open', params: { discussion: JSON.stringify(discussion) }, })}
+    >
       <View className="flex-row items-center mb-3">
         <MaterialIcons name="forum" size={24} color={discussion.iconColor} />
         <View className="ml-4">
@@ -127,6 +131,7 @@ export default function CommunitySection() {
     </TouchableOpacity>
   );
 
+
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: '#0a0f1a' }}>
       <ScrollView className='mt-10'>
@@ -134,7 +139,7 @@ export default function CommunitySection() {
           <Text className="text-2xl px-5 mb-4 text-white font-semibold">Your Renewable Investments</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pl-5">
             {INVESTED_PROJECTS.map((project) => (
-              <TouchableOpacity 
+              <TouchableOpacity
                 key={project.id}
                 onPress={() => router.push(`/tickets/invested/${project.id}`)}
                 className="rounded-xl mr-5 w-80 overflow-hidden"
@@ -163,7 +168,7 @@ export default function CommunitySection() {
       </ScrollView>
 
       {/* Add Discussion Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => setModalVisible(true)}
         className="absolute bottom-6 right-6 w-14 h-14 rounded-full justify-center items-center"
         style={{ backgroundColor: '#00b890' }}
@@ -181,16 +186,16 @@ export default function CommunitySection() {
         <View className="flex-1 justify-end" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <View className="bg-[#131d2a] rounded-t-3xl p-6" style={{ maxHeight: '80%' }}>
             <Text className="text-white text-2xl font-bold mb-4">New Discussion</Text>
-            
+
             <Text className="text-gray-300 mb-2">Title</Text>
             <TextInput
               className="bg-[#0a0f1a] text-white p-3 rounded-lg mb-4"
               placeholder="Enter discussion title"
               placeholderTextColor="#666"
               value={newDiscussion.title}
-              onChangeText={(text) => setNewDiscussion({...newDiscussion, title: text})}
+              onChangeText={(text) => setNewDiscussion({ ...newDiscussion, title: text })}
             />
-            
+
             <Text className="text-gray-300 mb-2">Description</Text>
             <TextInput
               className="bg-[#0a0f1a] text-white p-3 rounded-lg mb-4"
@@ -200,32 +205,32 @@ export default function CommunitySection() {
               numberOfLines={4}
               textAlignVertical="top"
               value={newDiscussion.description}
-              onChangeText={(text) => setNewDiscussion({...newDiscussion, description: text})}
+              onChangeText={(text) => setNewDiscussion({ ...newDiscussion, description: text })}
             />
-            
+
             <Text className="text-gray-300 mb-2">Your Name</Text>
             <TextInput
               className="bg-[#0a0f1a] text-white p-3 rounded-lg mb-6"
               placeholder="Enter your name"
               placeholderTextColor="#666"
               value={newDiscussion.createdBy}
-              onChangeText={(text) => setNewDiscussion({...newDiscussion, createdBy: text})}
+              onChangeText={(text) => setNewDiscussion({ ...newDiscussion, createdBy: text })}
             />
-            
+
             <View className="flex-row justify-end">
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setModalVisible(false)}
                 className="py-3 px-6 rounded-lg mr-3"
               >
                 <Text className="text-gray-400 font-semibold">Cancel</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 onPress={addNewDiscussion}
                 className="bg-[#00b890] py-3 px-6 rounded-lg"
                 disabled={!newDiscussion.title || !newDiscussion.description || !newDiscussion.createdBy}
-                style={{ 
-                  opacity: (!newDiscussion.title || !newDiscussion.description || !newDiscussion.createdBy) ? 0.5 : 1 
+                style={{
+                  opacity: (!newDiscussion.title || !newDiscussion.description || !newDiscussion.createdBy) ? 0.5 : 1
                 }}
               >
                 <Text className="text-white font-semibold">Add Discussion</Text>

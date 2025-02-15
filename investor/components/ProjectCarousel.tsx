@@ -22,7 +22,7 @@ const data = [
     funded: 7500,
     goal: 10000,
     supporters: 320,
-    image: 'https://images.unsplash.com/photo-1484399172022-72a90b12e3c1',
+    image: 'https://media.istockphoto.com/id/939799722/photo/solar-panel-on-a-red-roof.webp?a=1&b=1&s=612x612&w=0&k=20&c=w5_wvKkIMQy2aDgL_0O3gHtAUR-rF_4opqqkz35ajK4=',
   },
   {
     id: '2',
@@ -31,7 +31,7 @@ const data = [
     funded: 5400,
     goal: 8000,
     supporters: 210,
-    image: 'https://images.unsplash.com/photo-1464790719320-516ecd75af6c',
+    image: 'https://media.istockphoto.com/id/1044284546/photo/atlantic-forest-in-brazil-mata-atlantica.jpg?s=1024x1024&w=is&k=20&c=FGAbR9LEUNhlyvloIrTDyVdvHIDMFcx3lCG73ViDJnw=',
   },
   {
     id: '3',
@@ -40,7 +40,7 @@ const data = [
     funded: 6800,
     goal: 12000,
     supporters: 410,
-    image: 'https://images.unsplash.com/photo-1504439468489-c8920d796a29',
+    image: 'https://plus.unsplash.com/premium_photo-1680732319236-554b7b1e2d31?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
   {
     id: '4',
@@ -49,7 +49,7 @@ const data = [
     funded: 9200,
     goal: 15000,
     supporters: 500,
-    image: 'https://images.unsplash.com/photo-1536939459926-301728717817',
+    image: 'https://images.unsplash.com/photo-1606160054803-1d3628097c07?q=80&w=1928&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   },
 ];
 
@@ -136,10 +136,10 @@ const ProjectCarousel = () => {
                 <View style={styles.progressContainer}>
                   <View style={styles.progressInfo}>
                     <Text style={styles.fundingAmount}>
-                      ${item.funded.toLocaleString()}
+                      ₹{item.funded.toLocaleString()}
                     </Text>
                     <Text style={styles.fundingGoal}>
-                      of ${item.goal.toLocaleString()}
+                      of ₹{item.goal.toLocaleString()}
                     </Text>
                   </View>
                   <View style={styles.progressBar}>
