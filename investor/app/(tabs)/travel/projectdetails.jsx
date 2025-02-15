@@ -93,9 +93,6 @@ const ProjectDetails = () => {
   
         if (response.ok && data.project) {
           setProject(data.project); // ✅ Set project using nested object
-          console.log("Fetched Project:", data.project);
-          console.log(data.project.raisedAmount)
-          console.log(dummyProjects.impactMetrics)
         } else {
           console.error("Project not found:", data);
         }
