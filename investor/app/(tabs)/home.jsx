@@ -59,7 +59,7 @@ export default function Home() {
   const busyDates = {
     '2025-02-10': { selected: true, selectedColor: "#064e3b" },
     '2025-02-15': { selected: true, selectedColor: "#064e3b" },
-    '2025-02-20': { selected: true, selectedColor: "#064e3b" },
+    // '2025-02-20': { selected: true, selectedColor: "#064e3b" },
   };
   
 
