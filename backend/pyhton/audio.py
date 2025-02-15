@@ -3,14 +3,10 @@ import whisper
 import subprocess
 import os
 from flask_cors import CORS
-from transformers import pipeline
+import ollama  # Import Ollama for local Llama 3 model
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-
-# Load Hugging Face pipelines
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-sentiment_analyzer = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english")
 
 def extract_audio(video_path, audio_path="output_audio.wav"):
     """Extracts audio from video using ffmpeg."""
@@ -30,8 +26,8 @@ def transcribe():
         return jsonify({"error": "No file provided"}), 400
     
     file = request.files["file"]
-    save_dir = os.path.dirname(os.path.abspath(__file__))  # Get script directory
-    video_path = os.path.join(save_dir, "Recording_2025-02-15_190352.mp4")
+    save_dir = os.path.dirname(os.path.abspath(__file__))  # Get current script directory
+    video_path = os.path.join(save_dir, "uploaded_video.mp4")
     
     file.save(video_path)
 
@@ -50,22 +46,27 @@ def transcribe():
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    """Summarize and analyze sentiment of transcribed text."""
+    """Summarize and analyze sentiment of transcribed text using Ollama's Llama 3 model."""
     data = request.get_json()
     if "text" not in data:
         return jsonify({"error": "No text provided"}), 400
     
     text = data["text"]
+    print("text hereeeeeeeeee",text)
 
     # Summarization
-    summary = summarizer(text, max_length=150, min_length=50, do_sample=False)
-    
+    summary_prompt = f"Summarize this text: {text}"
+    summary_response = ollama.generate(model="llama3.2:3b", prompt=summary_prompt)
+    summary = summary_response["response"]
+
     # Sentiment Analysis
-    sentiment = sentiment_analyzer(text)
+    sentiment_prompt = f"Analyze the sentiment of this text: {text}. Reply only with POSITIVE, NEGATIVE, or NEUTRAL."
+    sentiment_response = ollama.generate(model="llama3.2:3b", prompt=sentiment_prompt)
+    sentiment = sentiment_response["response"]
 
     return jsonify({
-        "summary": summary[0]['summary_text'],
-        "sentiment": sentiment[0]
+        "summary": summary.strip(),
+        "sentiment": sentiment.strip()
     })
 
 if __name__ == "__main__":
