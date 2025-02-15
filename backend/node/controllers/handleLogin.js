@@ -1,6 +1,7 @@
 const Project = require("../models/Project");
 const Investor = require("../models/Investor");
 const Founder = require("../models/Founder");
+const Meeting = require("../models/Meeting");
 
 const createProject = async (req, res) => {
   try {
@@ -68,11 +69,15 @@ const getFounder = async (req, res) => {
     // Fetch full project details
     const projects = await Project.find({ _id: { $in: founder.projects } }).select("-__v -updatedAt");
 
-    // Convert founder document to plain object and replace projects array
-    const founderWithProjects = founder.toObject();
-    founderWithProjects.projects = projects;
+    // Fetch full meeting details
+    const meetings = await Meeting.find({ _id: { $in: founder.meetings } }).select("-__v -updatedAt");
 
-    return res.status(200).json({ founder: founderWithProjects });
+    // Convert founder document to plain object and replace projects & meetings array
+    const founderData = founder.toObject();
+    founderData.projects = projects;
+    founderData.meetings = meetings;
+
+    return res.status(200).json({ founder: founderData });
 
   } catch (err) {
     console.error(err);
@@ -107,6 +112,57 @@ const getInvestor = async (req, res) => {
   }
 };
 
+
+const createMeeting = async (req, res) => {
+  try {
+    const { founderName, investorNames, title, date, startTime, endTime, keyPoints } = req.body;
+
+    // Find the founder
+    const founder = await Founder.findOne({ name: founderName });
+    if (!founder) {
+      return res.status(404).json({ error: "Founder not found" });
+    }
+
+    // Find the investors
+    const investors = await Investor.find({ name: { $in: investorNames } });
+    if (investors.length !== investorNames.length) {
+      return res.status(404).json({ error: "One or more investors not found" });
+    }
+
+    console.log("Founder before meeting creation:", founder);
+
+    // Create the meeting
+    const meeting = new Meeting({
+      title,
+      date,
+      startTime,
+      endTime,
+      keyPoints,
+      founder: founder._id,
+      investors: investors.map((inv) => inv._id),
+      sentiment: "Neutral" // Default value
+    });
+
+    await meeting.save(); // Save the meeting explicitly
+
+    // Push the meeting ID to the founder's `meetings` array and save
+    if (!founder.meetings) {
+      founder.meetings = [];
+    }
+    founder.meetings.push(meeting._id);
+    await founder.save();
+
+    console.log("Founder after meeting update:", await Founder.findById(founder._id));
+
+    return res.status(201).json({ meeting, message: "Meeting created successfully and linked to founder" });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message || "Internal Server Error" });
+  }
+};
+
+
 module.exports = {
   createProject,
   getProject,
@@ -114,4 +170,5 @@ module.exports = {
   getFounder,
   createInvestor,
   getInvestor,
+  createMeeting,
 };

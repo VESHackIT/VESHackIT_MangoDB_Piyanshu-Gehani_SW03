@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 // Chakra imports
 import { Box, Button, Flex, Grid, Icon, Image, Spacer, Text } from "@chakra-ui/react";
@@ -54,10 +54,37 @@ const updatesData = [
 ];
 
 function Dashboard() {
+	const [founderData, setFounderData] = useState(null);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await fetch("http://localhost:5001/login/founder/Piyanshu");
+				const data = await response.json();
+				console.log("Data:", data);
+				setFounderData(data.founder);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
+		};
+
+		fetchData();
+	}, []);
+
+	if (!founderData) {
+		return <Text>Loading...</Text>;
+	}
+
 
 	const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning ☀️" : hour < 18 ? "Good afternoon 🌤️" : "Good evening 🌙";
+	const greeting =
+		hour < 12 ? "Good morning ☀️" : hour < 18 ? "Good afternoon 🌤️" : "Good evening 🌙";
+	const totalRaised = founderData?.projects.reduce((sum, project) => sum + project.raisedAmount, 0);
+	const successfulProjects = founderData.projects.filter(
+		(project) => project.raisedAmount >= project.fundingGoal
+	  ).length;
+	const successRate = founderData.projects.length > 0 ? (successfulProjects / founderData.projects.length) * 100 : 0;
+	
 
 	return (
 		<Flex direction='column' pt={{ base: "120px", md: "75px" }} mx='auto'>
@@ -69,147 +96,147 @@ function Dashboard() {
 							md: "1fr 1fr",
 						}}
 						gap='26px'>
-							{/* Welcome Card */}
-							<Card
-  p="0px"
-  gridArea={{ md: "1 / 1 / 2 / 3", "2xl": "auto" }}
-  borderRadius="lg"
-  boxShadow="xl"
-  bg="#000000"
-  color="white"
->
-  <CardBody w="100%" h="100%">
-    <Flex
-      flexDirection="row"
-      align="center"
-      justify="space-between"
-      w="100%"
-      h="100%"
-      p="20px"  
-    >
-      <Flex flexDirection="column" w="65%" lineHeight="1.6" justify="center">
-        <Text fontSize="sm" color="gray.400" fontWeight="bold">
-          {greeting},
-        </Text>
-        <Text fontSize="32px" fontWeight="bold" mb="16px">
-          Deep
-        </Text>
-        <Text fontSize="md" color="gray.400" fontWeight="normal" mb="auto">
-          Ready to make an impact today? 🚀 <br />
-          Need help? Just ask!
-        </Text>
-        <Spacer />
-        <Flex align="center">
-          <Button
-            p="0px"
-            variant="no-hover"
-            bg="transparent"
-            onClick={() => window.open("https://www.producthunt.com", "_blank")}
-          >
-            <Text
-              fontSize="sm"
-              color="#fff"
-              fontWeight="bold"
-              cursor="pointer"
-              transition="all .3s ease"
-              _hover={{ me: "4px" }}
-            >
-              Explore trending projects
-            </Text>
-            <Icon
-              as={BsArrowRight}
-              w="20px"
-              h="20px"
-              color="#fff"
-              fontSize="2xl"
-              transition="all .3s ease"
-              mx=".3rem"
-              cursor="pointer"
-              pt="4px"
-              _hover={{ transform: "translateX(20%)" }}
-            />
-          </Button>
-        </Flex>
-      </Flex>
 
-      <Flex
-        justify="center"
-        align="center"
-        w="65%"
-        h="100%"
-        // bg="teal.500"
-        borderRadius="md"
-        boxShadow="md"
-      >
-        {/* Adjusted the image width */}
-        <Image src={earthImg} alt="Earth" w="100%" h="auto" objectFit="cover"  borderRadius="lg"
-        boxShadow="md"/>
-      </Flex>
-    </Flex>
-  </CardBody>
-</Card>
+						{/* Welcome Card */}
+						<Card
+							p="0px"
+							gridArea={{ md: "1 / 1 / 2 / 3", "2xl": "auto" }}
+							borderRadius="lg"
+							boxShadow="xl"
+							bg="#000000"
+							color="white"
+						>
+							<CardBody w="100%" h="100%">
+								<Flex
+									flexDirection="row"
+									align="center"
+									justify="space-between"
+									w="100%"
+									h="100%"
+									p="20px"
+								>
+									<Flex flexDirection="column" w="65%" lineHeight="1.6" justify="center">
+										<Text fontSize="sm" color="gray.400" fontWeight="bold">
+											{greeting},
+										</Text>
+										<Text fontSize="32px" fontWeight="bold" mb="16px">
+											{founderData.name}
+										</Text>
+										<Text fontSize="md" color="gray.400" fontWeight="normal" mb="auto">
+											Ready to make an impact today? 🚀 <br />
+											Need help? Just ask!
+										</Text>
+										<Spacer />
+										<Flex align="center">
+											<Button
+												p="0px"
+												variant="no-hover"
+												bg="transparent"
+												onClick={() => window.open("https://www.producthunt.com", "_blank")}
+											>
+												<Text
+													fontSize="sm"
+													color="#fff"
+													fontWeight="bold"
+													cursor="pointer"
+													transition="all .3s ease"
+													_hover={{ me: "4px" }}
+												>
+													Explore trending projects
+												</Text>
+												<Icon
+													as={BsArrowRight}
+													w="20px"
+													h="20px"
+													color="#fff"
+													fontSize="2xl"
+													transition="all .3s ease"
+													mx=".3rem"
+													cursor="pointer"
+													pt="4px"
+													_hover={{ transform: "translateX(20%)" }}
+												/>
+											</Button>
+										</Flex>
+									</Flex>
+
+									<Flex
+										justify="center"
+										align="center"
+										w="65%"
+										h="100%"
+										borderRadius="md"
+										boxShadow="md"
+									>
+										<Image src={earthImg} alt="Earth" w="100%" h="auto" objectFit="cover" borderRadius="lg" boxShadow="md" />
+									</Flex>
+								</Flex>
+							</CardBody>
+						</Card>
+
 
 
 						{/* Project Stats */}
 						<Card
-  p="16px"
-  backgroundImage="linear-gradient(127.09deg, #000000 19.41%, #000000 76.65%)"
-  backgroundRepeat="no-repeat"
-  bgSize="cover"
-  bgPosition="center"
-  borderRadius="lg"
-  boxShadow="lg"
->
-  <CardBody h="100%" w="100%">
-    <Flex direction="column" color="white" h="100%" p="0px 10px 20px 10px" w="100%">
-      {/* Founder Rating Section */}
-      <Flex justify="space-between" align="center">
-        <Text fontSize="lg" fontWeight="bold" textTransform="uppercase" letterSpacing="wide">
-          Founder Rating
-        </Text>
-        <Text fontSize="2xl" fontWeight="bold" color="green.400">
-          ⭐ 4.8 / 5
-        </Text>
-      </Flex>
+              p="16px"
+              backgroundImage="linear-gradient(127.09deg, #000000 19.41%, #000000 76.65%)"
+              backgroundRepeat="no-repeat"
+              bgSize="cover"
+              bgPosition="center"
+              borderRadius="lg"
+              boxShadow="lg"
+            >
+              <CardBody h="100%" w="100%">
+                <Flex direction="column" color="white" h="100%" p="0px 10px 20px 10px" w="100%">
+                  {/* Founder Rating Section */}
+                  <Flex justify="space-between" align="center">
+                    <Text fontSize="lg" fontWeight="bold" textTransform="uppercase" letterSpacing="wide">
+                      Founder Rating
+                    </Text>
+                    <Text fontSize="2xl" fontWeight="bold" color="green.400">
+                      ⭐ 4.7 / 5
+                    </Text>
+                  </Flex>
 
-      <Spacer />
+                  <Spacer />
 
-      {/* Active Projects & Key Stats */}
-      <Flex direction="column">
-        <Box>
-          <Text fontSize="sm" color="gray.400" fontWeight="medium">
-            Active Projects
-          </Text>
-          <Text fontSize="xl" fontWeight="bold" letterSpacing="wide">
-            🚀 3 Projects
-          </Text>
-        </Box>
+                  {/* Active Projects & Key Stats */}
+                  <Flex direction="column">
+                    <Box>
+                      <Text fontSize="sm" color="gray.400" fontWeight="medium">
+                        Active Projects
+                      </Text>
+                      <Text fontSize="xl" fontWeight="bold" letterSpacing="wide">
+                        🚀 {founderData.projects.length} Projects
+                      </Text>
+                    </Box>
 
-        <Flex mt="16px">
-          {/* Total Raised */}
-          <Flex direction="column" me="34px">
-            <Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
-              Total Raised
-            </Text>
-            <Text fontSize="lg" fontWeight="bold" color="green.400">
-              💰 $200,000
-            </Text>
-          </Flex>
+                    <Flex mt="16px">
+                      {/* Total Raised */}
+                      <Flex direction="column" me="34px">
+                        <Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
+                          Total Raised
+                        </Text>
+                        <Text fontSize="lg" fontWeight="bold" color="green.400">
+                          💰 ${totalRaised}
+                        </Text>
+                      </Flex>
 
-          {/* Success Rate */}
-          <Flex direction="column">
-            <Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
-              Success Rate
-            </Text>
-            <Text fontSize="lg" fontWeight="bold" color="green.400">
-              📈 92%
-            </Text>
-          </Flex>
-        </Flex>
-      </Flex>
-    </Flex>
-  </CardBody>
-</Card>
+                      {/* Success Rate */}
+                      <Flex direction="column">
+                        <Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
+                          Success Rate
+                        </Text>
+                        <Text fontSize="lg" fontWeight="bold" color="green.400">
+                          📈 {successRate.toFixed(0)}%
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </Flex>
+                </Flex>
+              </CardBody>
+            </Card>
+
 
 						{/* AI Insights */}
 						<Card>
@@ -222,10 +249,11 @@ function Dashboard() {
 									borderRadius='18px'>
 									<Flex direction='column'>
 										<Text color='#E9EDF7' fontSize='12px'>
-											AI Project Score
+											Average Project Score
 										</Text>
 										<Text color='#fff' fontWeight='bold' fontSize='34px'>
-											87%
+										{founderData.projects.length > 0 ? 
+                        (founderData.projects.reduce((sum, project) => sum + project.sustainability_score, 0) / founderData.projects.length).toFixed(0) + '%' : 'N/A'}
 										</Text>
 									</Flex>
 									<Flex direction='column'>
@@ -268,7 +296,7 @@ function Dashboard() {
 										</Flex>
 									</Flex>
 									<Text color='#fff' fontSize='sm' fontWeight='bold'>
-										92%
+									92%
 									</Text>
 								</Flex>
 							</Flex>
@@ -294,49 +322,49 @@ function Dashboard() {
 							<Flex
 								direction='column'
 								w='100%'>
-								{projectsData.map((project, index) => (
-									<GradientBorder
-										mb='24px'
-										w='100%'
-										borderRadius='20px'
-										key={index}>
-										<Flex
-											p='22px'
-											bg="linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)"
-											borderRadius='20px'
-											width='100%'>
-											<Flex direction='column' flex='1'>
-												<Text color='#fff' fontSize='md' fontWeight='bold' mb='10px'>
-													{project.name}
-												</Text>
-												<Flex justify='space-between' mb='10px'>
-													<Text color='gray.400' fontSize='sm'>
-														Raised:
-													</Text>
-													<Text color='#fff' fontSize='sm'>
-														${project.raised.toLocaleString()}/${project.goal.toLocaleString()}
-													</Text>
-												</Flex>
-												<Flex justify='space-between'>
-													<Text color='gray.400' fontSize='sm'>
-														Sustainability Score:
-													</Text>
-													<Text color='#fff' fontSize='sm'>
-														{project.sustainability}%
-													</Text>
-												</Flex>
-											</Flex>
-											<Flex align='center' ml='20px'>
-												<Text
-													color={project.status === 'Active' ? 'green.400' : 'yellow.400'}
-													fontSize='sm'
-													fontWeight='bold'>
-													{project.status}
-												</Text>
-											</Flex>
-										</Flex>
-									</GradientBorder>
-								))}
+								{founderData.projects.map((project, index) => (
+                  <GradientBorder
+                    mb='24px'
+                    w='100%'
+                    borderRadius='20px'
+                    key={index}>
+                    <Flex
+                      p='22px'
+                      bg="linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)"
+                      borderRadius='20px'
+                      width='100%'>
+                      <Flex direction='column' flex='1'>
+                        <Text color='#fff' fontSize='md' fontWeight='bold' mb='10px'>
+                          {project.name}
+                        </Text>
+                        <Flex justify='space-between' mb='10px'>
+                          <Text color='gray.400' fontSize='sm'>
+                            Raised:
+                          </Text>
+                          <Text color='#fff' fontSize='sm'>
+                            ${project.raisedAmount.toLocaleString()}/${project.fundingGoal.toLocaleString()}
+                          </Text>
+                        </Flex>
+                        <Flex justify='space-between'>
+                          <Text color='gray.400' fontSize='sm'>
+                            Sustainability Score:
+                          </Text>
+                          <Text color='#fff' fontSize='sm'>
+                            {project.sustainability_score}%
+                          </Text>
+                        </Flex>
+                      </Flex>
+                      <Flex align='center' ml='20px'>
+                        <Text
+                          color={project.raisedAmount >= project.fundingGoal ? 'green.400' : 'yellow.400'}
+                          fontSize='sm'
+                          fontWeight='bold'>
+                          {project.raisedAmount >= project.fundingGoal ? 'Active' : 'Pending'}
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </GradientBorder>
+                ))}
 							</Flex>
 						</CardBody>
 					</Card>
@@ -391,40 +419,41 @@ function Dashboard() {
 								<Text color='gray.400' fontSize='sm' mb='16px' fontWeight='bold'>
 									RECENT MEETINGS
 								</Text>
-								<GradientBorder mb='20px' borderRadius='20px'>
-									<Flex
-										bg='linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)'
-										p='16px'
-										borderRadius='20px'
-										direction='column'>
-										<Flex justify='space-between' mb='10px'>
-											<Text color='#fff' fontSize='sm' fontWeight='bold'>
-												Investor Pitch - Round A
-											</Text>
-											<Text color='green.400' fontSize='xs'>
-												Positive Sentiment
-											</Text>
-										</Flex>
-										<Text color='gray.400' fontSize='xs' mb='10px'>
-											Yesterday, 15:00 - 16:30
-										</Text>
-										<Box p='10px' borderRadius='10px'>
-											<Text color='gray.300' fontSize='xs'>
-												Key Points: Project scalability discussed, sustainability metrics approved,
-												timeline adjustment needed for Phase 2
-											</Text>
-										</Box>
-										<Flex mt='10px' justify='flex-end'>
-											<Button variant='outline' size='sm' style={{
-												backgroundColor: "transparent",
-												borderColor: "white",
-												color: "white"
-											}}>
-												View Recording
-											</Button>
-										</Flex>
-									</Flex>
-								</GradientBorder>
+								{founderData.meetings.map((meeting, index) => (
+                  <GradientBorder mb='20px' borderRadius='20px' key={index}>
+                    <Flex
+                      bg='linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)'
+                      p='16px'
+                      borderRadius='20px'
+                      direction='column'>
+                      <Flex justify='space-between' mb='10px'>
+                        <Text color='#fff' fontSize='sm' fontWeight='bold'>
+                          {meeting.title}
+                        </Text>
+                        <Text color={meeting.sentiment === 'Positive' ? 'green.400' : meeting.sentiment === 'Neutral' ? 'yellow.400' : 'red.400'} fontSize='xs'>
+                          {meeting.sentiment} Sentiment
+                        </Text>
+                      </Flex>
+                      <Text color='gray.400' fontSize='xs' mb='10px'>
+                        {new Date(meeting.date).toLocaleDateString()}, {meeting.startTime} - {meeting.endTime}
+                      </Text>
+                      <Box p='10px' borderRadius='10px'>
+                        <Text color='gray.300' fontSize='xs'>
+                          Key Points: {meeting.keyPoints.join(', ')}
+                        </Text>
+                      </Box>
+                      <Flex mt='10px' justify='flex-end'>
+                        <Button variant='outline' size='sm' style={{
+                          backgroundColor: "transparent",
+                          borderColor: "white",
+                          color: "white"
+                        }}>
+                          View Recording
+                        </Button>
+                      </Flex>
+                    </Flex>
+                  </GradientBorder>
+                ))}
 							</Box>
 
 							{/* Founder Achievements - Gamification */}

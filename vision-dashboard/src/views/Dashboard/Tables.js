@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import {
 	Box,
 	Button,
@@ -34,7 +35,6 @@ import IconBox from 'components/Icons/IconBox';
 import { CartIcon, DocumentIcon, GlobeIcon, RocketIcon, StatsIcon, WalletIcon } from 'components/Icons/Icons.js';
 import DashboardTableRow from 'components/Tables/DashboardTableRow';
 import TimelineRow from 'components/Tables/TimelineRow';
-import React from 'react';
 import { AiFillCheckCircle } from 'react-icons/ai';
 import { BiHappy } from 'react-icons/bi';
 import { BsArrowRight } from 'react-icons/bs';
@@ -49,6 +49,41 @@ import {
 import { dashboardTableData, timelineData } from 'variables/general';
 
 export default function Dashboard() {
+	const [founderData, setFounderData] = useState(null);
+
+	useEffect(() => {
+		const fetchData = async () => {
+		  try {
+			const response = await fetch('http://localhost:5001/login/founder/Piyanshu');
+			const data = await response.json();
+			setFounderData(data.founder);
+		  } catch (error) {
+			console.error('Error fetching data:', error);
+		  }
+		};
+	
+		fetchData();
+	  }, []);
+	
+	  if (!founderData) {
+		return <Text>Loading...</Text>;
+	  }
+
+	  // Calculate total funds raised and success rate
+  const totalRaised = founderData.projects.reduce((sum, project) => sum + project.raisedAmount, 0);
+  const successRate = (founderData.projects.length > 0
+    ? (founderData.projects.filter((project) => project.raisedAmount >= project.fundingGoal).length /
+        founderData.projects.length) *
+      100
+    : 0
+  ).toFixed(0);
+
+  // Mock data for funding progress, backers, etc.
+  const fundingProgress = (totalRaised / (founderData.projects.reduce((sum, project) => sum + project.fundingGoal, 0)) * 100);
+  const backersThisYear = Math.floor(Math.random() * 1000) + 500; // Random backers count
+  const avgContribution = totalRaised / backersThisYear;
+
+
 	return (
 		<Flex flexDirection='column' pt={{ base: '120px', md: '75px' }}>
 			<SimpleGrid columns={{ sm: 1, md: 2, xl: 3 }} spacing='24px'>
@@ -61,8 +96,8 @@ export default function Dashboard() {
 									Total Funds Raised
 								</StatLabel>
 								<Flex>
-									<StatNumber fontSize='lg' color='#fff'>$120,000</StatNumber>
-									<StatHelpText color='green.400' fontWeight='bold' ps='3px' fontSize='md'>+80%</StatHelpText>
+									<StatNumber fontSize='lg' color='#fff'> ${totalRaised.toLocaleString()}</StatNumber>
+									<StatHelpText color='green.400' fontWeight='bold' ps='3px' fontSize='md'>+{fundingProgress.toFixed(0)}%</StatHelpText>
 								</Flex>
 							</Stat>
 							<IconBox as='box' h={'45px'} w={'45px'} bg='brand.200'>
@@ -81,7 +116,12 @@ export default function Dashboard() {
 									 Score
 								</StatLabel>
 								<Flex>
-									<StatNumber fontSize='lg' color='#fff'>92%</StatNumber>
+									<StatNumber fontSize='lg' color='#fff'>{founderData.projects.length > 0
+                      ? (
+                          founderData.projects.reduce((sum, project) => sum + project.sustainability_score, 0) /
+                          founderData.projects.length
+                        ).toFixed(0) + '%'
+                      : 'N/A'}</StatNumber>
 								</Flex>
 							</Stat>
 							<IconBox as='box' h={'45px'} w={'45px'} bg='brand.200'>
@@ -129,7 +169,7 @@ export default function Dashboard() {
 										<Box zIndex='-1'>
 											<CircularProgress
 												size={200}
-												value={85}
+												value={successRate}
 												thickness={6}
 												color='brand.400'
 												variant='vision'>
@@ -155,9 +195,9 @@ export default function Dashboard() {
 												0%
 											</Text>
 											<Flex direction='column' align='center' minW='80px'>
-												<Text color='#fff' fontSize='28px' fontWeight='bold'>
-													85%
-												</Text>
+											<Text color='#fff' fontSize='28px' fontWeight='bold'>
+                  {successRate}%
+                </Text>
 												<Text fontSize='xs' color='gray.400'>
 													Success Rate
 												</Text>
@@ -211,7 +251,7 @@ export default function Dashboard() {
 											<Box mx={{ sm: 'auto', md: '0px' }}>
 												<CircularProgress
 													size={window.innerWidth >= 1024 ? 200 : window.innerWidth >= 768 ? 170 : 200}
-													value={75}
+													value={fundingProgress}
 													thickness={6}
 													color='yellow.500'
 													variant='vision'>
@@ -225,7 +265,7 @@ export default function Dashboard() {
 																fontSize={{ md: '20px', lg: '20px' }}
 																fontWeight='bold'
 																mb='4px'>
-																75%
+																{fundingProgress.toFixed(0)}%
 															</Text>
 															<Text color='gray.400' fontSize='sm'>
 																Completion
@@ -368,7 +408,7 @@ export default function Dashboard() {
 								<Icon as={IoCheckmarkDoneCircleSharp} color='teal.300' w={4} h={4} pe='3px' />
 								<Text fontSize='sm' color='gray.400' fontWeight='normal'>
 									<Text fontWeight='bold' as='span'>
-										12 projects
+									{founderData.projects.length} projects
 									</Text>{' '}
 									under review
 								</Text>
@@ -397,42 +437,17 @@ export default function Dashboard() {
 							</Tr>
 						</Thead>
 						<Tbody>
-							{[
-								{
-									name: "SolarVille Community Grid",
-									logo: "/solar-icon.png",
-									impactArea: "Rural Community",
-									budget: "$850,000",
-									progression: 25,
-									members: ["Project Lead", "Technical Lead", "Community Manager"]
-								},
-								{
-									name: "Urban Solar Initiative",
-									logo: "/urban-icon.png",
-									impactArea: "City District",
-									budget: "$1.2M",
-									progression: 50,
-									members: ["Project Lead", "Grid Expert", "Community Liaison"]
-								},
-								{
-									name: "Industrial Solar Park",
-									logo: "/industrial-icon.png",
-									impactArea: "Industrial Zone",
-									budget: "$2.5M",
-									progression: 75,
-									members: ["Project Director", "Technical Team", "Sustainability Lead"]
-								}
-							].map((project, index, arr) => (
-								<DashboardTableRow
-									key={index}
-									name={project.name}
-									logo={project.logo}
-									members={project.members}
-									budget={project.budget}
-									progression={project.progression}
-									lastItem={index === arr.length - 1}
-								/>
-							))}
+						{founderData.projects.map((project, index) => (
+              <DashboardTableRow
+                key={index}
+                name={project.name}
+                logo={medusa} // Replace with actual project logo if available
+                members={['Project Lead', 'Technical Lead', 'Community Manager']} // Mock members
+                budget={`$${project.fundingGoal.toLocaleString()}`}
+                progression={(project.raisedAmount / project.fundingGoal) * 100}
+                lastItem={index === founderData.projects.length - 1}
+              />
+            ))}
 						</Tbody>
 					</Table>
 				</Card>
