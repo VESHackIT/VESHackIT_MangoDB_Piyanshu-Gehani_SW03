@@ -97,44 +97,66 @@ function Dashboard() {
     setProjectData((prev) => ({ ...prev, [name]: value }));
   };
   const verifyPitchDeck = async () => {
-    if (!projectData.pitchDeck) {
-      toast({
-        title: "No file uploaded.",
-        description: "Please upload a pitch deck to verify.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    // Simulating verification process (replace with real API call)
-    setVerificationStatus("loading");
-
-    setTimeout(() => {
-      const isValid = projectData.pitchDeck.name.endsWith(".pdf"); // Simple check (can be extended)
-      if (isValid) {
-        setIsPitchDeckValid(true);
-        setVerificationStatus("success");
-        toast({
-          title: "Pitch Deck Verified!",
-          description: "Your document is valid and ready to submit.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        setVerificationStatus("error");
-        toast({
-          title: "Invalid Pitch Deck!",
-          description: "Please upload a valid PDF document.",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    }, 2000);
+	if (!projectData.pitchDeck) {
+	  toast({
+		title: "No file uploaded.",
+		description: "Please upload a pitch deck to verify.",
+		status: "warning",
+		duration: 3000,
+		isClosable: true,
+	  });
+	  return;
+	}
+  
+	setVerificationStatus("loading");
+  
+	const formData = new FormData();
+	formData.append("file", projectData.pitchDeck);
+  
+	try {
+	  const response = await fetch("http://127.0.0.1:5005/verify-project", {
+		method: "POST",
+		body: formData,
+	  });
+  
+	  const result = await response.json();
+  
+	  if (response.ok) {
+		if (result.verification_result === "NOT LEGITIMATE") {
+		  setVerificationStatus("error");
+		  toast({
+			title: "Pitch Deck Not Legitimate!",
+			description: "Your document did not pass verification.",
+			status: "error",
+			duration: 3000,
+			isClosable: true,
+		  });
+		} else {
+		  setIsPitchDeckValid(true);
+		  setVerificationStatus("success");
+		  toast({
+			title: "Pitch Deck Verified!",
+			description: "Your document is valid and ready to submit.",
+			status: "success",
+			duration: 3000,
+			isClosable: true,
+		  });
+		}
+	  } else {
+		throw new Error(result.error || "Verification failed");
+	  }
+	} catch (error) {
+	  setVerificationStatus("error");
+	  toast({
+		title: "Verification Failed!",
+		description: error.message,
+		status: "error",
+		duration: 3000,
+		isClosable: true,
+	  });
+	}
   };
+  
 
 
 
@@ -145,21 +167,66 @@ function Dashboard() {
     setVerificationStatus(null);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!isPitchDeckValid) {
-      toast({
-        title: "Verification Required!",
-        description: "Please verify your pitch deck before submitting.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-    console.log("Project Data:", projectData);
-    setProjectOpen(false);
+  const handleSubmit = async (e) => {
+	e.preventDefault();
+  
+	if (!isPitchDeckValid) {
+	  toast({
+		title: "Verification Required!",
+		description: "Please verify your pitch deck before submitting.",
+		status: "warning",
+		duration: 3000,
+		isClosable: true,
+	  });
+	  return;
+	}
+  
+	// Construct the required JSON payload
+	const projectPayload = {
+	  founderName: "Piyanshu",
+	  name: projectData.name,
+	  description: projectData.description,
+	  founder: "67b05f187e733c945ca69a27", // Replace with the actual founder ID if dynamic
+	  fundingGoal: Number(projectData.fundingGoal),
+	};
+  
+	console.log("Submitting Project Data:", projectPayload);
+  
+	try {
+	  const response = await fetch("http://localhost:5001/login/project", {
+		method: "POST",
+		headers: {
+		  "Content-Type": "application/json",
+		},
+		body: JSON.stringify(projectPayload),
+	  });
+  
+	  const result = await response.json();
+	  console.log("Submission Result:", result);
+  
+	  if (response.ok) {
+		toast({
+		  title: "Project Created!",
+		  description: "Your project has been successfully created.",
+		  status: "success",
+		  duration: 3000,
+		  isClosable: true,
+		});
+		setProjectOpen(false); // Close modal or reset UI
+	  } else {
+		throw new Error(result.error || "Project creation failed");
+	  }
+	} catch (error) {
+	  toast({
+		title: "Submission Failed!",
+		description: error.message,
+		status: "error",
+		duration: 3000,
+		isClosable: true,
+	  });
+	}
   };
+  
 
 
 
