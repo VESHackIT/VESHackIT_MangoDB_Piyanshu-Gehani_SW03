@@ -135,14 +135,15 @@ function Dashboard() {
       <Flex
         justify="center"
         align="center"
-        w="35%"
+        w="65%"
         h="100%"
-        bg="teal.500"
+        // bg="teal.500"
         borderRadius="md"
         boxShadow="md"
       >
         {/* Adjusted the image width */}
-        <Image src={earthImg} alt="Earth" w="100%" h="auto" objectFit="cover" />
+        <Image src={earthImg} alt="Earth" w="100%" h="auto" objectFit="cover"  borderRadius="lg"
+        boxShadow="md"/>
       </Flex>
     </Flex>
   </CardBody>
