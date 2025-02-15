@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -53,6 +54,8 @@ const dummyData = [
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const statusBarHeight = StatusBar.currentHeight || 20;
 
   const theme = {
@@ -65,9 +68,40 @@ const ProjectList = () => {
   };
 
   useEffect(() => {
-    setProjects(dummyData);
-  }, []);
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch("http://192.168.39.152:5001/login/allprojects");
+        if (!response.ok) {
+          throw new Error("Failed to fetch projects");
+        }
+        const data = await response.json();
+        setProjects(data.projects);
+        
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchProjects();
+  }, []);
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text className="text-white mt-3">Loading Projects...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+        <Text className="text-red-500">{error}</Text>
+      </View>
+    );
+  }
   const renderProgressBar = (progress) => {
     return (
       <View className="h-1 bg-white/10 rounded overflow-hidden">
@@ -104,16 +138,17 @@ const ProjectList = () => {
       </View>
 
       {projects.map((project) => {
-        const progress = project.raisedAmount / project.targetAmount;
+        const progress = project.raisedAmount / project.fundingGoal;
         return (
           <TouchableOpacity
             key={project._id}
             className="mb-6 rounded-xl overflow-hidden shadow-sm"
             style={{ backgroundColor: theme.surface }}
             onPress={() => {
+              
               router.push({
                 pathname: "/(tabs)/travel/projectdetails",
-                params: { id: project._id },
+                params: { name: project.name },
               });
             }}
           >
@@ -133,7 +168,7 @@ const ProjectList = () => {
                   >
                     <Icon name="shield" size={12} color={theme.primary} />
                     <Text className="ml-1 font-semibold" style={{ color: theme.primary }}>
-                      {project.impactMetrics.trustScore.split("/")[0]}
+                      {project.trustScore}
                     </Text>
                   </View>
                 </View>
@@ -141,7 +176,7 @@ const ProjectList = () => {
                 <View className="flex-row items-center mb-2.5">
                   <Icon name="map-pin" size={12} color={theme.inactive} />
                   <Text className="ml-1 text-sm" style={{ color: theme.inactive }}>
-                    {project.location}
+                    Mumbai, Maharashtra
                   </Text>
                 </View>
 
@@ -149,14 +184,14 @@ const ProjectList = () => {
                   className="text-sm leading-relaxed"
                   style={{ color: "#c3cfe2" }}
                 >
-                  {project.description}
+                  {project.shortDescription}
                 </Text>
               </View>
 
               {/* Image Section */}
               <View className="relative h-40 rounded-lg overflow-hidden mb-5">
                 <Image
-                  source={{ uri: project.imageUrl }}
+                  source={{ uri: project.imageUri }}
                   className="absolute w-full h-full"
                 />
                 <LinearGradient
@@ -174,7 +209,7 @@ const ProjectList = () => {
                   >
                     <Icon name="users" size={12} color={theme.primary} />
                     <Text className="ml-1 text-xs text-white">
-                      {project.impactMetrics.householdsBenefited}
+                      220
                     </Text>
                   </View>
                   
@@ -184,7 +219,7 @@ const ProjectList = () => {
                   >
                     <Icon name="trending-up" size={12} color={theme.primary} />
                     <Text className="ml-1 text-xs text-white">
-                      {project.impactMetrics.roi}
+                      12%
                     </Text>
                   </View>
                 </View>
@@ -197,7 +232,7 @@ const ProjectList = () => {
                     ₹{project.raisedAmount.toLocaleString()}
                   </Text>
                   <Text className="ml-1 text-sm" style={{ color: theme.inactive }}>
-                    / ₹{project.targetAmount.toLocaleString()}
+                    / ₹{project.fundingGoal.toLocaleString()}
                   </Text>
                 </View>
                 
@@ -207,7 +242,7 @@ const ProjectList = () => {
                   <View className="flex-row items-center">
                     <Icon name="clock" size={12} color={theme.inactive} />
                     <Text className="ml-1 text-sm" style={{ color: theme.inactive }}>
-                      {project.daysLeft} days left
+                      22 days left
                     </Text>
                   </View>
                   
@@ -236,7 +271,7 @@ const ProjectList = () => {
                       className="ml-3 text-sm"
                       style={{ color: theme.inactive }}
                     >
-                      {project.investors[project.investors.length - 1]}
+                      +220 others
                     </Text>
                   </View>
                 </View>
@@ -251,7 +286,7 @@ const ProjectList = () => {
                 onPress={() => {
                   router.push({
                     pathname: "/(tabs)/travel/projectdetails",
-                    params: { id: project._id },
+                    params: { name: project.name },
                   });
                 }}
               >
