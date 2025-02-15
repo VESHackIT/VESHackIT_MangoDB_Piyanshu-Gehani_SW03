@@ -1,34 +1,30 @@
 const Project = require("../models/Project");
 const Investor = require("../models/Investor");
 const Founder = require("../models/Founder");
+const Meeting = require("../models/Meeting");
 
 const createProject = async (req, res) => {
   try {
-    const founderName = req.body.founderName;
 
     // Find the founder
-    const founder = await Founder.findOne({ name: founderName });
+    const founder = await Founder.findOne({ name: req.body.founderName });
+
     if (!founder) {
       return res.status(404).json({ error: "Founder not found" });
     }
-
-    // Create the project
-    const project = await Project.create({ ...req.body, founder: founder._id });
-
-    // Add the project to the founder's projects array
-    founder.projects.push(project._id);
-    await founder.save();
-
-    return res
-      .status(201)
-      .json({ message: "Project created successfully", project, founder });
+    const founderId = founder._id;
+    const project = await Project.create({ ...req.body, founder: founderId });
+    // const project = await Project.create(req.body);
+    return res.status(201).json({ project });
   } catch (err) {
     console.error(err);
     return res
       .status(500)
-      .json({ error: err.message || "Internal Server Error" });
+      .json({ err: err.message || "Internal Server Error" });
   }
 };
+
+
 
 const getProject = async (req, res) => {
   try {
@@ -58,15 +54,31 @@ const createFounder = async (req, res) => {
 const getFounder = async (req, res) => {
   try {
     const founder = await Founder.findOne({ name: req.params.name });
+
     if (!founder) {
       return res.status(404).json({ message: "Founder not found" });
     }
-    return res.status(200).json({ founder });
+
+    // Fetch full project details
+    const projects = await Project.find({ _id: { $in: founder.projects } }).select("-__v -updatedAt");
+
+    // Fetch full meeting details
+    const meetings = await Meeting.find({ _id: { $in: founder.meetings } }).select("-__v -updatedAt");
+
+    // Convert founder document to plain object and replace projects & meetings array
+    const founderData = founder.toObject();
+    founderData.projects = projects;
+    founderData.meetings = meetings;
+
+    return res.status(200).json({ founder: founderData });
+
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ err });
+    return res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 };
+
+
 
 const createInvestor = async (req, res) => {
   try {
@@ -93,6 +105,57 @@ const getInvestor = async (req, res) => {
   }
 };
 
+
+const createMeeting = async (req, res) => {
+  try {
+    const { founderName, investorNames, title, date, startTime, endTime, keyPoints } = req.body;
+
+    // Find the founder
+    const founder = await Founder.findOne({ name: founderName });
+    if (!founder) {
+      return res.status(404).json({ error: "Founder not found" });
+    }
+
+    // Find the investors
+    const investors = await Investor.find({ name: { $in: investorNames } });
+    if (investors.length !== investorNames.length) {
+      return res.status(404).json({ error: "One or more investors not found" });
+    }
+
+    console.log("Founder before meeting creation:", founder);
+
+    // Create the meeting
+    const meeting = new Meeting({
+      title,
+      date,
+      startTime,
+      endTime,
+      keyPoints,
+      founder: founder._id,
+      investors: investors.map((inv) => inv._id),
+      sentiment: "Neutral" // Default value
+    });
+
+    await meeting.save(); // Save the meeting explicitly
+
+    // Push the meeting ID to the founder's `meetings` array and save
+    if (!founder.meetings) {
+      founder.meetings = [];
+    }
+    founder.meetings.push(meeting._id);
+    await founder.save();
+
+    console.log("Founder after meeting update:", await Founder.findById(founder._id));
+
+    return res.status(201).json({ meeting, message: "Meeting created successfully and linked to founder" });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message || "Internal Server Error" });
+  }
+};
+
+
 module.exports = {
   createProject,
   getProject,
@@ -100,4 +163,5 @@ module.exports = {
   getFounder,
   createInvestor,
   getInvestor,
+  createMeeting,
 };

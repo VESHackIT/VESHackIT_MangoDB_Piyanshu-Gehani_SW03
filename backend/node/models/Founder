@@ -5,6 +5,8 @@ const founderSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     bio: { type: String },
     projects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }], // Projects they created
+    impact_score: { type: Number, default: 0 },
+    meetings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Meeting" }] // Meetings they attended
   },
   { timestamps: true }
 );

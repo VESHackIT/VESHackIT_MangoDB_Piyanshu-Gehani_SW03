@@ -1,497 +1,545 @@
-import {
-	Box,
-	Button,
-	CircularProgress,
-	CircularProgressLabel,
-	Flex,
-	Grid,
-	Icon,
-	Progress,
-	SimpleGrid,
-	Spacer,
-	Stack,
-	Stat,
-	StatHelpText,
-	StatLabel,
-	StatNumber,
-	Table,
-	Tbody,
-	Text,
-	Th,
-	Thead,
-	Tr
-} from '@chakra-ui/react';
-// Styles for the circular progressbar
-import medusa from 'assets/img/cardimgfree.png';
+import React, { useEffect, useState } from "react";
+
+// Chakra imports
+import { Box, Button, Flex, Grid, Icon, Image, Spacer, Text } from "@chakra-ui/react";
+
 // Custom components
-import Card from 'components/Card/Card.js';
-import CardBody from 'components/Card/CardBody.js';
-import CardHeader from 'components/Card/CardHeader.js';
-import BarChart from 'components/Charts/BarChart';
-import LineChart from 'components/Charts/LineChart';
-import IconBox from 'components/Icons/IconBox';
+import Card from "components/Card/Card.js";
+import CardBody from "components/Card/CardBody.js";
+import CardHeader from "components/Card/CardHeader.js";
+import GradientBorder from "components/GradientBorder/GradientBorder";
+import IconBox from "components/Icons/IconBox";
+
 // Icons
-import { CartIcon, DocumentIcon, GlobeIcon, RocketIcon, StatsIcon, WalletIcon } from 'components/Icons/Icons.js';
-import DashboardTableRow from 'components/Tables/DashboardTableRow';
-import TimelineRow from 'components/Tables/TimelineRow';
-import React from 'react';
-import { AiFillCheckCircle } from 'react-icons/ai';
-import { BiHappy } from 'react-icons/bi';
-import { BsArrowRight } from 'react-icons/bs';
-import { IoCheckmarkDoneCircleSharp, IoEllipsisHorizontal } from 'react-icons/io5';
-// Data
+import earthImg from "./../../assets/earth.jpg"
+import { FaPencilAlt, FaRegCalendarAlt } from "react-icons/fa";
+import { IoEllipsisHorizontalSharp } from "react-icons/io5";
 import {
-	barChartDataDashboard,
-	barChartOptionsDashboard,
-	lineChartDataDashboard,
-	lineChartOptionsDashboard
-} from 'variables/charts';
-import { dashboardTableData, timelineData } from 'variables/general';
+	GraphIcon,
+	BillIcon,
+} from "components/Icons/Icons";
+import { BsArrowRight } from "react-icons/bs";
 
-export default function Dashboard() {
+// Sample Data
+const projectsData = [
+	{
+		name: "Project Green Earth",
+		raised: 125000,
+		goal: 200000,
+		sustainability: 92,
+		status: "Active",
+	},
+	{
+		name: "Ocean Cleanup",
+		raised: 75000,
+		goal: 150000,
+		sustainability: 88,
+		status: "Pending",
+	}
+];
+
+const updatesData = [
+	{
+		title: "Q1 Financial Report",
+		date: "Today, 16:36",
+		type: "Document",
+		status: "Pending"
+	},
+	{
+		title: "Phase 1 Complete",
+		date: "Yesterday, 12:30",
+		type: "Milestone",
+		status: "Approved"
+	}
+];
+
+function Dashboard() {
+	const [founderData, setFounderData] = useState(null);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await fetch("http://localhost:5001/login/founder/Piyanshu");
+				const data = await response.json();
+				console.log("Data:", data);
+				setFounderData(data.founder);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
+		};
+
+		fetchData();
+	}, []);
+
+	if (!founderData) {
+		return <Text>Loading...</Text>;
+	}
+
+
+	const hour = new Date().getHours();
+	const greeting =
+		hour < 12 ? "Good morning ☀️" : hour < 18 ? "Good afternoon 🌤️" : "Good evening 🌙";
+	const totalRaised = founderData?.projects.reduce((sum, project) => sum + project.raisedAmount, 0);
+	const successfulProjects = founderData.projects.filter(
+		(project) => project.raisedAmount >= project.fundingGoal
+	  ).length;
+	const successRate = founderData.projects.length > 0 ? (successfulProjects / founderData.projects.length) * 100 : 0;
+	
+
 	return (
-		<Flex flexDirection='column' pt={{ base: '120px', md: '75px' }}>
-			<SimpleGrid columns={{ sm: 1, md: 2, xl: 3 }} spacing='24px'>
-				{/* Project Funding Status */}
-				<Card>
-					<CardBody>
-						<Flex flexDirection='row' align='center' justify='center' w='100%'>
-							<Stat me='auto'>
-								<StatLabel fontSize='sm' color='gray.400' fontWeight='bold' pb='2px'>
-									Total Funds Raised
-								</StatLabel>
-								<Flex>
-									<StatNumber fontSize='lg' color='#fff'>$120,000</StatNumber>
-									<StatHelpText color='green.400' fontWeight='bold' ps='3px' fontSize='md'>+80%</StatHelpText>
-								</Flex>
-							</Stat>
-							<IconBox as='box' h={'45px'} w={'45px'} bg='brand.200'>
-								<WalletIcon h={'24px'} w={'24px'} color='#fff' />
-							</IconBox>
-						</Flex>
-					</CardBody>
-				</Card>
+		<Flex direction='column' pt={{ base: "120px", md: "75px" }} mx='auto'>
+			<Grid templateColumns={{ sm: "1fr", lg: "60% 38%" }}>
+				<Box>
+					<Grid
+						templateColumns={{
+							sm: "1fr",
+							md: "1fr 1fr",
+						}}
+						gap='26px'>
 
-				{/* AI Validation Status */}
-				<Card>
-					<CardBody>
-						<Flex flexDirection='row' align='center' justify='center' w='100%'>
-							<Stat>
-								<StatLabel fontSize='sm' color='gray.400' fontWeight='bold' pb='2px'>
-									 Score
-								</StatLabel>
-								<Flex>
-									<StatNumber fontSize='lg' color='#fff'>92%</StatNumber>
-								</Flex>
-							</Stat>
-							<IconBox as='box' h={'45px'} w={'45px'} bg='brand.200'>
-								<RocketIcon h={'24px'} w={'24px'} color='#fff' />
-							</IconBox>
-						</Flex>
-					</CardBody>
-				</Card>
+						{/* Welcome Card */}
+						<Card
+							p="0px"
+							gridArea={{ md: "1 / 1 / 2 / 3", "2xl": "auto" }}
+							borderRadius="lg"
+							boxShadow="xl"
+							bg="#000000"
+							color="white"
+						>
+							<CardBody w="100%" h="100%">
+								<Flex
+									flexDirection="row"
+									align="center"
+									justify="space-between"
+									w="100%"
+									h="100%"
+									p="20px"
+								>
+									<Flex flexDirection="column" w="65%" lineHeight="1.6" justify="center">
+										<Text fontSize="sm" color="gray.400" fontWeight="bold">
+											{greeting},
+										</Text>
+										<Text fontSize="32px" fontWeight="bold" mb="16px">
+											{founderData.name}
+										</Text>
+										<Text fontSize="md" color="gray.400" fontWeight="normal" mb="auto">
+											Ready to make an impact today? 🚀 <br />
+											Need help? Just ask!
+										</Text>
+										<Spacer />
+										<Flex align="center">
+											<Button
+												p="0px"
+												variant="no-hover"
+												bg="transparent"
+												onClick={() => window.open("https://www.producthunt.com", "_blank")}
+											>
+												<Text
+													fontSize="sm"
+													color="#fff"
+													fontWeight="bold"
+													cursor="pointer"
+													transition="all .3s ease"
+													_hover={{ me: "4px" }}
+												>
+													Explore trending projects
+												</Text>
+												<Icon
+													as={BsArrowRight}
+													w="20px"
+													h="20px"
+													color="#fff"
+													fontSize="2xl"
+													transition="all .3s ease"
+													mx=".3rem"
+													cursor="pointer"
+													pt="4px"
+													_hover={{ transform: "translateX(20%)" }}
+												/>
+											</Button>
+										</Flex>
+									</Flex>
 
-				{/* Founder Rating */}
-				<Card>
-					<CardBody>
-						<Flex flexDirection='row' align='center' justify='center' w='100%'>
-							<Stat>
-								<StatLabel fontSize='sm' color='gray.400' fontWeight='bold' pb='2px'>
-									Founder Trust Rating
-								</StatLabel>
-								<Flex>
-									<StatNumber fontSize='lg' color='#fff'>4.7/5</StatNumber>
+									<Flex
+										justify="center"
+										align="center"
+										w="65%"
+										h="100%"
+										borderRadius="md"
+										boxShadow="md"
+									>
+										<Image src={earthImg} alt="Earth" w="100%" h="auto" objectFit="cover" borderRadius="lg" boxShadow="md" />
+									</Flex>
 								</Flex>
-							</Stat>
-							<IconBox as='box' h={'45px'} w={'45px'} bg='brand.200'>
-								<StatsIcon h={'24px'} w={'24px'} color='#fff' />
-							</IconBox>
-						</Flex>
-					</CardBody>
-				</Card>
-			</SimpleGrid>
+							</CardBody>
+						</Card>
 
-			<Grid templateColumns={{ sm: '1fr', md: '1fr 1fr', '2xl': '2fr 1.2fr 1.5fr' }} my='26px' gap='18px'>
-				
-				{/* Satisfaction Rate */}
-				<Card gridArea={{ md: '2 / 1 / 3 / 2', '2xl': 'auto' }}>
-									<CardHeader mb='24px'>
+
+
+						{/* Project Stats */}
+						<Card
+              p="16px"
+              backgroundImage="linear-gradient(127.09deg, #000000 19.41%, #000000 76.65%)"
+              backgroundRepeat="no-repeat"
+              bgSize="cover"
+              bgPosition="center"
+              borderRadius="lg"
+              boxShadow="lg"
+            >
+              <CardBody h="100%" w="100%">
+                <Flex direction="column" color="white" h="100%" p="0px 10px 20px 10px" w="100%">
+                  {/* Founder Rating Section */}
+                  <Flex justify="space-between" align="center">
+                    <Text fontSize="lg" fontWeight="bold" textTransform="uppercase" letterSpacing="wide">
+                      Founder Rating
+                    </Text>
+                    <Text fontSize="2xl" fontWeight="bold" color="green.400">
+                      ⭐ 4.7 / 5
+                    </Text>
+                  </Flex>
+
+                  <Spacer />
+
+                  {/* Active Projects & Key Stats */}
+                  <Flex direction="column">
+                    <Box>
+                      <Text fontSize="sm" color="gray.400" fontWeight="medium">
+                        Active Projects
+                      </Text>
+                      <Text fontSize="xl" fontWeight="bold" letterSpacing="wide">
+                        🚀 {founderData.projects.length} Projects
+                      </Text>
+                    </Box>
+
+                    <Flex mt="16px">
+                      {/* Total Raised */}
+                      <Flex direction="column" me="34px">
+                        <Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
+                          Total Raised
+                        </Text>
+                        <Text fontSize="lg" fontWeight="bold" color="green.400">
+                          💰 ${totalRaised}
+                        </Text>
+                      </Flex>
+
+                      {/* Success Rate */}
+                      <Flex direction="column">
+                        <Text fontSize="xs" color="gray.300" fontWeight="medium" textTransform="uppercase">
+                          Success Rate
+                        </Text>
+                        <Text fontSize="lg" fontWeight="bold" color="green.400">
+                          📈 {successRate.toFixed(0)}%
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </Flex>
+                </Flex>
+              </CardBody>
+            </Card>
+
+
+						{/* AI Insights */}
+						<Card>
+							<Flex direction='column'>
+								<Flex
+									justify='space-between'
+									p='22px'
+									mb='18px'
+									bg='linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)'
+									borderRadius='18px'>
+									<Flex direction='column'>
+										<Text color='#E9EDF7' fontSize='12px'>
+											Average Project Score
+										</Text>
+										<Text color='#fff' fontWeight='bold' fontSize='34px'>
+										{founderData.projects.length > 0 ? 
+                        (founderData.projects.reduce((sum, project) => sum + project.sustainability_score, 0) / founderData.projects.length).toFixed(0) + '%' : 'N/A'}
+										</Text>
+									</Flex>
+									<Flex direction='column'>
+										<Button
+											bg='transparent'
+											_hover='none'
+											_active='none'
+											alignSelf='flex-end'
+											p='0px'>
+											<Icon
+												as={IoEllipsisHorizontalSharp}
+												color='#fff'
+												w='24px'
+												h='24px'
+											/>
+										</Button>
+										<GraphIcon w='60px' h='18px' />
+									</Flex>
+								</Flex>
+								<Text fontSize='10px' color='gray.400' mb='8px'>
+									KEY METRICS
+								</Text>
+								<Flex justify='space-between' align='center'>
+									<Flex align='center'>
+										<IconBox
+											bg='#22234B'
+											borderRadius='30px'
+											w='42px'
+											h='42px'
+											me='10px'>
+											<BillIcon w='22px' h='22px' />
+										</IconBox>
 										<Flex direction='column'>
-											<Text color='#fff' fontSize='lg' fontWeight='bold' mb='4px'>
-												Project Success Rate
+											<Text color='#fff' fontSize='sm' mb='2px'>
+												Feasibility
 											</Text>
 											<Text color='gray.400' fontSize='sm'>
-												From all solar projects
+												High Probability
 											</Text>
 										</Flex>
-									</CardHeader>
-									<Flex direction='column' justify='center' align='center'>
-										<Box zIndex='-1'>
-											<CircularProgress
-												size={200}
-												value={85}
-												thickness={6}
-												color='#00b38c'
-												variant='vision'>
-												<CircularProgressLabel>
-													<IconBox mb='20px' mx='auto' bg='brand.200' borderRadius='50%' w='48px' h='48px'>
-														<Icon as={BiHappy} color='#fff' w='30px' h='30px' />
-													</IconBox>
-												</CircularProgressLabel>
-											</CircularProgress>
-										</Box>
-										<Stack
-											direction='row'
-											spacing={{ sm: '42px', md: '68px' }}
-											justify='center'
-											maxW={{ sm: '270px', md: '300px', lg: '100%' }}
-											mx={{ sm: 'auto', md: '0px' }}
-											p='18px 22px'
-											bg='linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)'
-											borderRadius='20px'
-											position='absolute'
-											bottom='5%'>
-											<Text fontSize='xs' color='gray.400'>
-												0%
-											</Text>
-											<Flex direction='column' align='center' minW='80px'>
-												<Text color='#fff' fontSize='28px' fontWeight='bold'>
-													85%
-												</Text>
-												<Text fontSize='xs' color='gray.400'>
-													Success Rate
-												</Text>
-											</Flex>
-											<Text fontSize='xs' color='gray.400'>
-												100%
-											</Text>
-										</Stack>
 									</Flex>
-								</Card>
-				{/* Project Status */}
-				<Card gridArea={{ md: '2 / 2 / 3 / 3', '2xl': 'auto' }}>
-									<Flex direction='column'>
-										<Flex justify='space-between' align='center' mb='40px'>
-											<Text color='#fff' fontSize='lg' fontWeight='bold'>
-												Project Status
+									<Text color='#fff' fontSize='sm' fontWeight='bold'>
+									92%
+									</Text>
+								</Flex>
+							</Flex>
+						</Card>
+					</Grid>
+					{/* Projects List */}
+					<Card p='16px' mt='24px'>
+						<CardHeader>
+							<Flex
+								justify='space-between'
+								align='center'
+								minHeight='60px'
+								w='100%'>
+								<Text fontSize='lg' color='#fff' fontWeight='bold'>
+									Active Projects
+								</Text>
+								{/* <Button maxW='135px' fontSize='10px' variant='brand'>
+                  NEW PROJECT
+                </Button> */}
+							</Flex>
+						</CardHeader>
+						<CardBody>
+							<Flex
+								direction='column'
+								w='100%'>
+								{founderData.projects.map((project, index) => (
+                  <GradientBorder
+                    mb='24px'
+                    w='100%'
+                    borderRadius='20px'
+                    key={index}>
+                    <Flex
+                      p='22px'
+                      bg="linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)"
+                      borderRadius='20px'
+                      width='100%'>
+                      <Flex direction='column' flex='1'>
+                        <Text color='#fff' fontSize='md' fontWeight='bold' mb='10px'>
+                          {project.name}
+                        </Text>
+                        <Flex justify='space-between' mb='10px'>
+                          <Text color='gray.400' fontSize='sm'>
+                            Raised:
+                          </Text>
+                          <Text color='#fff' fontSize='sm'>
+                            ${project.raisedAmount.toLocaleString()}/${project.fundingGoal.toLocaleString()}
+                          </Text>
+                        </Flex>
+                        <Flex justify='space-between'>
+                          <Text color='gray.400' fontSize='sm'>
+                            Sustainability Score:
+                          </Text>
+                          <Text color='#fff' fontSize='sm'>
+                            {project.sustainability_score}%
+                          </Text>
+                        </Flex>
+                      </Flex>
+                      <Flex align='center' ml='20px'>
+                        <Text
+                          color={project.raisedAmount >= project.fundingGoal ? 'green.400' : 'yellow.400'}
+                          fontSize='sm'
+                          fontWeight='bold'>
+                          {project.raisedAmount >= project.fundingGoal ? 'Active' : 'Pending'}
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </GradientBorder>
+                ))}
+							</Flex>
+						</CardBody>
+					</Card>
+				</Box>
+
+				{/* Updates, Meetings & Community Section */}
+				<Card
+					p='22px'
+					my={{ sm: "24px", lg: "0px" }}
+					ms={{ sm: "0px", lg: "24px" }}>
+					<CardHeader>
+						<Flex
+							direction={{ sm: "column", lg: "row" }}
+							justify={{ sm: "center", lg: "space-between" }}
+							align={{ sm: "center" }}
+							w='100%'
+							mb='1rem'>
+							<Text fontSize='lg' color='#fff' fontWeight='bold'>
+								Activity Center
+							</Text>
+							<Flex mt={{ sm: "10px", lg: "0" }}>
+								<Button
+									variant='brand'
+									fontSize='10px'
+									fontWeight='bold'
+									p='6px 32px'
+									me='10px'>
+									UPLOAD
+								</Button>
+								<Button
+									variant="outline"
+									fontSize="10px"
+									fontWeight="bold"
+									p="6px 32px"
+									color="white"
+									style={{
+										backgroundColor: "transparent",
+										borderColor: "white",
+
+									}}
+								>
+									SCHEDULE MEETING
+								</Button>
+
+							</Flex>
+						</Flex>
+					</CardHeader>
+					<CardBody>
+						<Flex direction='column' w='100%'>
+							{/* Meeting Summary Section */}
+							<Box mb='24px'>
+								<Text color='gray.400' fontSize='sm' mb='16px' fontWeight='bold'>
+									RECENT MEETINGS
+								</Text>
+								{founderData.meetings.map((meeting, index) => (
+                  <GradientBorder mb='20px' borderRadius='20px' key={index}>
+                    <Flex
+                      bg='linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)'
+                      p='16px'
+                      borderRadius='20px'
+                      direction='column'>
+                      <Flex justify='space-between' mb='10px'>
+                        <Text color='#fff' fontSize='sm' fontWeight='bold'>
+                          {meeting.title}
+                        </Text>
+                        <Text color={meeting.sentiment === 'Positive' ? 'green.400' : meeting.sentiment === 'Neutral' ? 'yellow.400' : 'red.400'} fontSize='xs'>
+                          {meeting.sentiment} Sentiment
+                        </Text>
+                      </Flex>
+                      <Text color='gray.400' fontSize='xs' mb='10px'>
+                        {new Date(meeting.date).toLocaleDateString()}, {meeting.startTime} - {meeting.endTime}
+                      </Text>
+                      <Box p='10px' borderRadius='10px'>
+                        <Text color='gray.300' fontSize='xs'>
+                          Key Points: {meeting.keyPoints.join(', ')}
+                        </Text>
+                      </Box>
+                      <Flex mt='10px' justify='flex-end'>
+                        <Button variant='outline' size='sm' style={{
+                          backgroundColor: "transparent",
+                          borderColor: "white",
+                          color: "white"
+                        }}>
+                          View Recording
+                        </Button>
+                      </Flex>
+                    </Flex>
+                  </GradientBorder>
+                ))}
+							</Box>
+
+							{/* Founder Achievements - Gamification */}
+							<Box mb="24px">
+								<Text color="gray.400" fontSize="sm" mb="16px" fontWeight="bold">
+									IMPACT ACHIEVEMENTS
+								</Text>
+								<GradientBorder borderRadius="20px">
+									<Flex bg='linear-gradient(126.97deg, rgba(10, 10, 10) 28.26%, rgba(5, 5, 5) 91.2%)' p="16px" borderRadius="20px" direction="column">
+										{/* Achievement Title & Level */}
+										<Flex justify="space-between" align="center" mb="16px">
+											<Text color="#fff" fontSize="sm" fontWeight="bold">
+												🌱 Sustainability Champion
 											</Text>
+											<Box bg="green.400" px="8px" py="2px" borderRadius="full">
+												<Text fontSize="xs">Level 4</Text>
+											</Box>
 										</Flex>
-										<Flex direction={{ sm: 'column', md: 'row' }}>
-											<Flex direction='column' me={{ md: '6px', lg: '52px' }} mb={{ sm: '16px', md: '0px' }}>
-												<Flex
-													direction='column'
-													p='22px'
-													pe={{ sm: '22e', md: '8px', lg: '22px' }}
-													minW={{ sm: '220px', md: '140px', lg: '220px' }}
-													bg='linear-gradient(126.97deg,rgb(10, 10, 10) 28.26%, rgba(5, 5, 5, 0.5) 91.2%)'
-													borderRadius='20px'
-													mb='20px'>
-													<Text color='gray.400' fontSize='sm' mb='4px'>
-														Panels Delivered
-													</Text>
-													<Text color='#fff' fontSize='lg' fontWeight='bold'>
-														50% Complete
-													</Text>
-												</Flex>
-												<Flex
-													direction='column'
-													p='22px'
-													pe={{ sm: '22px', md: '8px', lg: '22px' }}
-													minW={{ sm: '170px', md: '140px', lg: '170px' }}
-													bg='linear-gradient(126.97deg,rgb(10, 10, 10) 28.26%, rgba(5, 5, 5, 0.5) 91.2%)'
-													borderRadius='20px'>
-													<Text color='gray.400' fontSize='sm' mb='4px'>
-														Grid Connection
-													</Text>
-													<Text color='#fff' fontSize='lg' fontWeight='bold'>
-														In Progress
-													</Text>
-												</Flex>
-											</Flex>
-											<Box mx={{ sm: 'auto', md: '0px' }}>
-												<CircularProgress
-													size={window.innerWidth >= 1024 ? 200 : window.innerWidth >= 768 ? 170 : 200}
-													value={75}
-													thickness={6}
-													color='#05CD99'
-													variant='vision'>
-													<CircularProgressLabel>
-														<Flex direction='column' justify='center' align='center'>
-															<Text color='gray.400' fontSize='sm'>
-																Overall
-															</Text>
-															<Text
-																color='#fff'
-																fontSize={{ md: '36px', lg: '50px' }}
-																fontWeight='bold'
-																mb='4px'>
-																75%
-															</Text>
-															<Text color='gray.400' fontSize='sm'>
-																Completion
-															</Text>
-														</Flex>
-													</CircularProgressLabel>
-												</CircularProgress>
+
+										{/* Progress Grid */}
+										<Grid templateColumns="repeat(3, 1fr)" gap="10px" mb="10px">
+											<Box bg='linear-gradient(126.97deg, rgba(20, 20, 20) 28.26%, rgba(10, 10, 10) 91.2%)' p="10px" borderRadius="10px" textAlign="center">
+												<Text color="blue.300" fontSize="lg" fontWeight="bold">150+</Text>
+												<Text color="gray.400" fontSize="xs">Community Backers</Text>
+											</Box>
+											<Box bg='linear-gradient(126.97deg, rgba(20, 20, 20) 28.26%, rgba(10, 10, 10) 91.2%)' p="10px" borderRadius="10px" textAlign="center">
+												<Text color="yellow.300" fontSize="lg" fontWeight="bold">85%</Text>
+												<Text color="gray.400" fontSize="xs">Funding Progress</Text>
+											</Box>
+											<Box bg='linear-gradient(126.97deg, rgba(20, 20, 20) 28.26%, rgba(10, 10, 10) 91.2%)' p="10px" borderRadius="10px" textAlign="center">
+												<Text color="teal.300" fontSize="lg" fontWeight="bold">250</Text>
+												<Text color="gray.400" fontSize="xs">Metric Tons CO₂ Reduced</Text>
+											</Box>
+										</Grid>
+
+										{/* Reward Badge Section */}
+										<Flex justify="space-between" align="center" mt="16px">
+											<Text color="gray.300" fontSize="xs">🎖 Next Reward: Green Impact Badge</Text>
+											<Box bg="green.500" px="6px" py="2px" borderRadius="full">
+												<Text fontSize="xs" color="white">Earn 500 Solar Credits</Text>
 											</Box>
 										</Flex>
 									</Flex>
-								</Card>
-			</Grid>
-			<Grid
-				templateColumns={{ sm: '1fr', lg: '1.7fr 1.3fr' }}
-				maxW={{ sm: '100%', md: '100%' }}
-				gap='24px'
-				mb='24px'>
-				{/* Sales Overview */}
-				<Card p='28px 0px 0px 0px'>
-									<CardHeader mb='20px' ps='22px'>
-										<Flex direction='column' alignSelf='flex-start'>
-											<Text fontSize='lg' color='#fff' fontWeight='bold' mb='6px'>
-												Project Timeline
+								</GradientBorder>
+							</Box>
+
+
+							{/* Regular Updates Section */}
+							<Box mt="24px">
+								<Text color='gray.400' fontSize='sm' mb='16px' fontWeight='bold'>
+									RECENT UPDATES
+								</Text>
+								{updatesData.map((update, index) => (
+									<Flex
+										key={index}
+										justify='space-between'
+										mb='20px'
+										pb='20px'
+										borderBottom='1px solid rgba(255,255,255,0.1)'>
+										<Flex direction='column'>
+											<Text color='#fff' fontSize='sm' fontWeight='bold' mb='5px'>
+												{update.title}
 											</Text>
-											<Text fontSize='md' fontWeight='medium' color='gray.400'>
-												<Text as='span' color='green.400' fontWeight='bold'>
-													On Track
-												</Text>{' '}
-												for completion
+											<Text color='gray.400' fontSize='xs'>
+												{update.date}
 											</Text>
 										</Flex>
-									</CardHeader>
-									<Box w='100%' minH={{ sm: '300px' }}>
-										<LineChart
-											lineChartData={lineChartDataDashboard}
-											lineChartOptions={lineChartOptionsDashboard}
-										/>
-									</Box>
-								</Card>
-				{/* Active Users */}
-				<Card p='16px'>
-  <CardBody>
-    <Flex direction='column' w='100%'>
-      <Box
-        bg='linear-gradient(126.97deg, rgb(10, 10, 10) 28.26%, rgba(5, 5, 5, 0.5) 91.2%)'
-        borderRadius='20px'
-        display={{ sm: 'flex', md: 'block' }}
-        justify={{ sm: 'center', md: 'flex-start' }}
-        align={{ sm: 'center', md: 'flex-start' }}
-        minH={{ sm: '180px', md: '220px' }}
-        p={{ sm: '0px', md: '22px' }}>
-        <BarChart
-          barChartOptions={barChartOptionsDashboard}
-          barChartData={barChartDataDashboard}
-        />
-      </Box>
-      <Flex direction='column' mt='24px' mb='36px' alignSelf='flex-start'>
-        <Text fontSize='lg' color='#fff' fontWeight='bold' mb='6px'>
-          Project Funding Overview
-        </Text>
-        <Text fontSize='md' fontWeight='medium' color='gray.400'>
-          <Text as='span' color='green.400' fontWeight='bold'>
-            (+18%)
-          </Text>{' '}
-          growth in funding this month
-        </Text>
-      </Flex>
-      <SimpleGrid gap={{ sm: '12px' }} columns={4}>
-        <Flex direction='column'>
-          <Flex alignItems='center'>
-            <IconBox as='box' h={'30px'} w={'30px'} bg='brand.200' me='6px'>
-              <WalletIcon h={'15px'} w={'15px'} color='#fff' />
-            </IconBox>
-            <Text fontSize='sm' color='gray.400'>
-              Total Raised
-            </Text>
-          </Flex>
-          <Text fontSize={{ sm: 'md', lg: 'lg' }} color='#fff' fontWeight='bold' my='6px'>
-            $125,600
-          </Text>
-          <Progress colorScheme='brand' bg='#2D2E5F' borderRadius='30px' h='5px' value={70} />
-        </Flex>
-        <Flex direction='column'>
-          <Flex alignItems='center'>
-            <IconBox as='box' h={'30px'} w={'30px'} bg='brand.200' me='6px'>
-              <RocketIcon h={'15px'} w={'15px'} color='#fff' />
-            </IconBox>
-            <Text fontSize='sm' color='gray.400'>
-              Backers this year
-            </Text>
-          </Flex>
-          <Text fontSize={{ sm: 'md', lg: 'lg' }} color='#fff' fontWeight='bold' my='6px'>
-            1,245
-          </Text>
-          <Progress colorScheme='brand' bg='#2D2E5F' borderRadius='30px' h='5px' value={85} />
-        </Flex>
-        <Flex direction='column'>
-          <Flex alignItems='center'>
-            <IconBox as='box' h={'30px'} w={'30px'} bg='brand.200' me='6px'>
-              <CartIcon h={'15px'} w={'15px'} color='#fff' />
-            </IconBox>
-            <Text fontSize='sm' color='gray.400'>
-              Projects Live
-            </Text>
-          </Flex>
-          <Text fontSize={{ sm: 'md', lg: 'lg' }} color='#fff' fontWeight='bold' my='6px'>
-            8
-          </Text>
-          <Progress colorScheme='brand' bg='#2D2E5F' borderRadius='30px' h='5px' value={40} />
-        </Flex>
-        <Flex direction='column'>
-          <Flex alignItems='center'>
-            <IconBox as='box' h={'30px'} w={'30px'} bg='brand.200' me='6px'>
-              <StatsIcon h={'15px'} w={'15px'} color='#fff' />
-            </IconBox>
-            <Text fontSize='sm' color='gray.400'>
-              Avg. Contribution
-            </Text>
-          </Flex>
-          <Text fontSize={{ sm: 'md', lg: 'lg' }} color='#fff' fontWeight='bold' my='6px'>
-            $210
-          </Text>
-          <Progress colorScheme='brand' bg='#2D2E5F' borderRadius='30px' h='5px' value={60} />
-        </Flex>
-      </SimpleGrid>
-    </Flex>
-  </CardBody>
-</Card>
-
-			</Grid>
-			<Grid templateColumns={{ sm: '1fr', md: '1fr 1fr', lg: '2fr 1fr' }} gap='24px'>
-				{/* Active Project Submissions */}
-				<Card p='16px' overflowX={{ sm: 'scroll', xl: 'hidden' }}>
-					<CardHeader p='12px 0px 28px 0px'>
-						<Flex direction='column'>
-							<Text fontSize='lg' color='#fff' fontWeight='bold' pb='8px'>
-								Active Project Submissions
-							</Text>
-							<Flex align='center'>
-								<Icon as={IoCheckmarkDoneCircleSharp} color='teal.300' w={4} h={4} pe='3px' />
-								<Text fontSize='sm' color='gray.400' fontWeight='normal'>
-									<Text fontWeight='bold' as='span'>
-										12 projects
-									</Text>{' '}
-									under review
-								</Text>
-							</Flex>
-						</Flex>
-					</CardHeader>
-					<Table variant='simple' color='#fff'>
-						<Thead>
-							<Tr my='.8rem' ps='0px'>
-								<Th
-									ps='0px'
-									color='gray.400'
-									fontFamily='Plus Jakarta Display'
-									borderBottomColor='#56577A'>
-									Project Name
-								</Th>
-								<Th color='gray.400' fontFamily='Plus Jakarta Display' borderBottomColor='#56577A'>
-									Impact Area
-								</Th>
-								<Th color='gray.400' fontFamily='Plus Jakarta Display' borderBottomColor='#56577A'>
-									Funding Goal
-								</Th>
-								<Th color='gray.400' fontFamily='Plus Jakarta Display' borderBottomColor='#56577A'>
-									Milestone Status
-								</Th>
-							</Tr>
-						</Thead>
-						<Tbody>
-							{[
-								{
-									name: "SolarVille Community Grid",
-									logo: "/solar-icon.png",
-									impactArea: "Rural Community",
-									budget: "$850,000",
-									progression: 25,
-									members: ["Project Lead", "Technical Lead", "Community Manager"]
-								},
-								{
-									name: "Urban Solar Initiative",
-									logo: "/urban-icon.png",
-									impactArea: "City District",
-									budget: "$1.2M",
-									progression: 50,
-									members: ["Project Lead", "Grid Expert", "Community Liaison"]
-								},
-								{
-									name: "Industrial Solar Park",
-									logo: "/industrial-icon.png",
-									impactArea: "Industrial Zone",
-									budget: "$2.5M",
-									progression: 75,
-									members: ["Project Director", "Technical Team", "Sustainability Lead"]
-								}
-							].map((project, index, arr) => (
-								<DashboardTableRow
-									key={index}
-									name={project.name}
-									logo={project.logo}
-									members={project.members}
-									budget={project.budget}
-									progression={project.progression}
-									lastItem={index === arr.length - 1}
-								/>
-							))}
-						</Tbody>
-					</Table>
-				</Card>
-				{/* Milestone Timeline */}
-				<Card>
-					<CardHeader mb='32px'>
-						<Flex direction='column'>
-							<Text fontSize='lg' color='#fff' fontWeight='bold' mb='6px'>
-								Milestone Timeline
-							</Text>
-							<Flex align='center'>
-								<Icon as={AiFillCheckCircle} color='green.500' w='15px' h='15px' me='5px' />
-								<Text fontSize='sm' color='gray.400' fontWeight='normal'>
-									<Text fontWeight='bold' as='span' color='gray.400'>
-										Next Review
-									</Text>{' '}
-									in 2 days
-								</Text>
-							</Flex>
-						</Flex>
-					</CardHeader>
-					<CardBody>
-						<Flex direction='column' lineHeight='21px'>
-							{[
-								{
-									logo: "PanelIcon",
-									title: "Solar Panel Delivery",
-									date: "April 15, 2024",
-									color: "green.500"
-								},
-								{
-									logo: "GridIcon",
-									title: "Grid Connection Planning",
-									date: "April 30, 2024",
-									color: "blue.500"
-								},
-								{
-									logo: "TestIcon",
-									title: "System Testing Phase",
-									date: "May 15, 2024",
-									color: "orange.500"
-								},
-								{
-									logo: "LaunchIcon",
-									title: "Grid Activation",
-									date: "May 30, 2024",
-									color: "purple.500"
-								}
-							].map((milestone, index, arr) => (
-								<TimelineRow
-									key={index}
-									logo={milestone.logo}
-									title={milestone.title}
-									date={milestone.date}
-									color={milestone.color}
-									index={index}
-									arrLength={arr.length}
-								/>
-							))}
+										<Flex align='center'>
+											<Text
+												color={update.status === 'Approved' ? 'green.400' : 'yellow.400'}
+												fontSize='sm'
+												me='10px'>
+												{update.status}
+											</Text>
+											<Button
+												variant='ghost'
+												size='sm'
+												p='0'
+												minW='auto'
+												h='auto'>
+												<Icon as={FaPencilAlt} color='gray.400' w='12px' h='12px' />
+											</Button>
+										</Flex>
+									</Flex>
+								))}
+							</Box>
 						</Flex>
 					</CardBody>
 				</Card>
@@ -499,3 +547,5 @@ export default function Dashboard() {
 		</Flex>
 	);
 }
+
+export default Dashboard;
