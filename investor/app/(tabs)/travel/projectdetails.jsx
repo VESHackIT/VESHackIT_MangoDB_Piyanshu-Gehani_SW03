@@ -8,6 +8,8 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Linking, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import React, { useEffect, useState } from "react";
+import { ChevronDown, ChevronUp } from 'react-native-feather';
+import { Video } from 'react-native-feather';
 const impactIcons = {
   carbonReduction: { icon: "cloud", color: "#4CAF50" }, // Green
   householdsBenefited: { icon: "home", color: "#3F51B5" }, // Blue
@@ -81,9 +83,87 @@ const openSocialLink = async (url) => {
   }
 };
 
+const calculateSatisfactionScore = (likes, dislikes) => {
+  const totalFeedback = likes + dislikes;
+  return totalFeedback > 0 ? (likes / totalFeedback) * 100 : 0;
+};
+
+// Function to determine color based on satisfaction score
+const getSatisfactionColor = (score) => {
+  if (score < 50) {
+    return 'text-red-500'; // Low
+  } else if (score >= 50 && score < 80) {
+    return 'text-yellow-500'; // Normal
+  } else {
+    return 'text-green-500'; // High
+  }
+};
+
+const MeetingSummaryCard = ({ likes, dislikes }) => {
+  // Calculate satisfaction score
+  const satisfactionScore = calculateSatisfactionScore(likes, dislikes);
+
+  // Determine color based on score
+  const scoreColor = getSatisfactionColor(satisfactionScore);
+
+  return (
+    <View className="bg-[#1e293b] p-4 rounded-lg my-4">
+      <Text className="text-white text-lg font-medium mb-2">Meeting Summary</Text>
+
+      <View className="flex-row justify-between items-center">
+        {/* Left Side: Likes and Dislikes */}
+        <View>
+          <Text className="text-gray-400">
+            Likes: <Text className="text-white">{likes}</Text>
+          </Text>
+          <Text className="text-gray-400">
+            Dislikes: <Text className="text-white">{dislikes}</Text>
+          </Text>
+        </View>
+
+        {/* Right Side: Satisfaction Score */}
+        <View className="items-end">
+          <Text className="text-gray-400">Satisfaction Score</Text>
+          <Text className={`text-2xl font-bold ${scoreColor}`}>
+            {satisfactionScore.toFixed(1)}%
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const ProjectDetails = () => {
   const { name } = useLocalSearchParams();
   const [project, setProject] = useState(null);
+  const [progresss, setProgress] = useState(null);
+  const [selectedPhase, setSelectedPhase] = useState(0);
+  
+  const statusColors = {
+    'completed': '#00b890',
+    'in-progress': '#f39c12',
+    'pending': '#95a5a6'
+  };
+  const handleMeetingVideo = () => {
+    // Open the meeting video link
+    const meetUri = progresss[selectedPhase].meetUri;
+
+    Linking.openURL(meetUri).catch((err) =>
+      console.error('Failed to open URL:', err)
+    );
+  };
+  const handleViewReport = () => {
+    // Get the reportUri for the currently selected phase
+    const reportUri = progresss[selectedPhase].reportUri;
+
+    // Open the document using the URL
+    Linking.openURL(reportUri).catch((err) =>
+      console.error('Failed to open URL:', err)
+    );
+  };
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).replace('-', ' ');
+  };
   
   useEffect(() => {
     const fetchProject = async () => {
@@ -93,6 +173,7 @@ const ProjectDetails = () => {
   
         if (response.ok && data.project) {
           setProject(data.project); // ✅ Set project using nested object
+          setProgress(data.project.progress)
         } else {
           console.error("Project not found:", data);
         }
@@ -124,6 +205,17 @@ const renderProgressBar = (progress) => {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
     );
+  };
+  const togglePhase = (phaseIndex) => {
+    setExpandedPhases((prev) =>
+      prev.includes(phaseIndex)
+        ? prev.filter((index) => index !== phaseIndex)
+        : [...prev, phaseIndex]
+    );
+  };
+  
+  const isPhaseExpanded = (phaseIndex) => {
+    return expandedPhases.includes(phaseIndex);
   };
   return (
     <ScrollView style={{ backgroundColor: theme.background }} className="flex-1">
@@ -228,6 +320,91 @@ const renderProgressBar = (progress) => {
           </Text>
         </View>
 
+        <Text className="text-white text-2xl font-semibold my-6">Project Progress</Text>
+      
+      <View className="p-4 bg-[#131d2a] flex-1">
+
+      {/* Phase Tabs */}
+      <View className="flex-row mb-6">
+        {progresss.map((phase, index) => (
+          <TouchableOpacity
+            key={index}
+            className={`flex-1 items-center pb-2 border-b-2 ${
+              selectedPhase === index ? 'border-[#00b890]' : 'border-transparent'
+            }`}
+            onPress={() => setSelectedPhase(index)}
+          >
+            <Text
+              className={`text-white text-lg ${
+                selectedPhase === index ? 'text-[#00b890] font-bold' : ''
+              }`}
+            >
+              P{index + 1}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View className="bg-[#1e293b] p-4 rounded-lg mb-4">
+      <View className="flex-row justify-between items-center">
+        {/* Left Side: Meeting Details */}
+        <View>
+          <Text className="text-white text-lg font-medium">Recent Meeting</Text>
+          <Text className="text-gray-400 text-sm">27/ 02/ 2025 , MONDAY</Text>
+        </View>
+
+        {/* Right Side: Meeting Icon Button */}
+        <TouchableOpacity
+          className="p-2 bg-[#00b890] rounded-full"
+          onPress={handleMeetingVideo}
+        >
+          <Video stroke="#ffffff" width={24} height={24} />
+        </TouchableOpacity>
+      </View>
+    </View>
+
+      {/* Table for Selected Phase */}
+      <View className="bg-[#1e293b] rounded-lg overflow-hidden">
+        <View className="flex-row justify-between p-4 bg-[#2d3a4b]">
+          <Text className="text-white font-bold">Task</Text>
+          <Text className="text-white font-bold">Status</Text>
+        </View>
+        <ScrollView>
+          {progresss[selectedPhase].tasks.map((task, taskIndex) => (
+            <View
+              key={taskIndex}
+              className="flex-row justify-between items-center p-4 border-b border-[#2d3a4b]"
+            >
+              <Text className="text-white">{task.title}</Text>
+              <View
+                className="px-2.5 py-1 rounded-full"
+                style={{
+                  backgroundColor: `${statusColors[task.status]}20`,
+                }}
+              >
+                <Text
+                  className="text-xs font-bold"
+                  style={{ color: statusColors[task.status] }}
+                >
+                  {capitalizeFirstLetter(task.status)}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+        
+      </View>
+      <MeetingSummaryCard
+        likes={progresss[selectedPhase].meetLikes}
+        dislikes={progresss[selectedPhase].meetDislikes}
+      />
+      <TouchableOpacity
+        className="mt-4 bg-[#00b890] p-3 rounded-lg items-center"
+        onPress={handleViewReport} // Use the URL from the selected phase
+      >
+        <Text className="text-white font-bold">View Phase Report</Text>
+      </TouchableOpacity>
+    </View>
+
 
         <Text className="text-xl font-pbold text-white my-5">Project Impact</Text>
         {/* Impact Metrics Cards */}
@@ -276,6 +453,7 @@ const renderProgressBar = (progress) => {
 
 
       </View>
+      
     </ScrollView>
   );
 };
