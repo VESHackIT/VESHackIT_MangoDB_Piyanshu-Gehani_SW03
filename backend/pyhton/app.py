@@ -11,7 +11,7 @@ import os
 
 # Configure Gemini AI API
 API_KEY = os.getenv("GEMINI_API_KEY")  # Use environment variable for security
-genai.configure(api_key="API_KEYgit config pull.rebase false")
+genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel(model_name='gemini-1.5-pro')
 
 # Initialize Flask app
@@ -116,37 +116,36 @@ def detect_objects():
 
 @app.route('/query', methods=['POST'])
 def search():
-    """Search for similar items in the dataset using FAISS and return the top matches."""
+    """Search for similar items in the dataset using FAISS and return the top matches for a single query."""
     try:
         data = request.get_json()
-        queries = data.get('queries', [])
+        query = data.get('query', '')
 
-        if not queries or not isinstance(queries, list):
-            return jsonify({"error": "A list of queries is required"}), 400
+        if not query or not isinstance(query, str):
+            return jsonify({"error": "A single query string is required"}), 400
 
-        # Encode queries
-        query_vectors = encoder.encode(queries, convert_to_numpy=True)
+        # Encode the query
+        query_vector = encoder.encode([query], convert_to_numpy=True)  # Encode as a single query
 
         # Search FAISS index
-        distances, indices = index.search(query_vectors, k=min(len(df), 10))  # Top 10 matches per query
+        k = min(len(df), 15)  # Top 10 matches
+        distances, indices = index.search(query_vector, k=k)
 
         # Prepare response
-        results = []
-        for query, dists, idxs in zip(queries, distances, indices):
-            query_results = [
-                {
-                    **df.iloc[idx].to_dict(),
-                    "similarity_score": float(dist)
-                }
-                for idx, dist in zip(idxs, dists)
-            ]
-            query_results.sort(key=lambda x: x["similarity_score"])  # Sort results
-            results.append({"query": query, "matches": query_results})
+        results = [
+            {
+                **df.iloc[idx].to_dict(),
+                "similarity_score": float(dist)
+            }
+            for idx, dist in zip(indices[0], distances[0])
+        ]
+        results.sort(key=lambda x: x["similarity_score"])  # Sort results by similarity score
 
-        return jsonify({"results": results})
+        return jsonify({"query": query, "matches": results})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
