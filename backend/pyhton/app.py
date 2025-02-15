@@ -11,7 +11,7 @@ import os
 
 # Configure Gemini AI API
 API_KEY = os.getenv("GEMINI_API_KEY")  # Use environment variable for security
-genai.configure(api_key="API_KEY")
+genai.configure(api_key="API_KEYgit config pull.rebase false")
 model = genai.GenerativeModel(model_name='gemini-1.5-pro')
 
 # Initialize Flask app
