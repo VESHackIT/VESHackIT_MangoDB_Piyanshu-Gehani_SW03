@@ -13,6 +13,8 @@ app.use(cors());
 app.use(express.json());
 const login = require("./routes/login");
 app.use("/login", login);
+const projects = require("./routes/handleProjects");
+app.use("/project", projects);
 
 // Test Route
 app.get("/", (req, res) => {
