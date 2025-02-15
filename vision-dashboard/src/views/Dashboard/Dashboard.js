@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 // Chakra imports
 import { Box, Button, Flex, Grid, Icon, Image, Spacer, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, VStack, Divider, Spinner } from "@chakra-ui/react";
 
+import { motion } from "framer-motion";
 // Custom components
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -57,6 +58,13 @@ const updatesData = [
 ];
 
 function Dashboard() {
+	const [rotating, setRotating] = useState(null);
+	const badges = [
+		{ value: "150+", label: "Community Backers", color: "blue.300" },
+		{ value: "85%", label: "Funding Progress", color: "yellow.300" },
+		{ value: "250", label: "Metric Tons CO₂ Reduced", color: "teal.300" },
+	  ];
+
 	// Sample Data
 	const meeting = [
 		{
@@ -88,6 +96,7 @@ function Dashboard() {
 	const [summary, setSummary] = useState(null);
 	const [transcript, setTranscript] = useState(null);
 	const [sentiment, setSentiment] = useState(null);
+	const [suggestions, setSuggestions] = useState(null);
 
 	const transcriptData = `John: Let's start with project updates. How's the API development going?
 Emma: We’ve completed the user authentication module, and now working on database optimization.
@@ -139,14 +148,15 @@ John: Sounds good. Let’s set a deadline for next week and track progress daily
 
 			const data = await response.json();
 			setSummary(data.summary);
-			//   setTranscript(data.transcript);
 			setSentiment(data.sentiment);
+			setSuggestions(data.suggestions);  // Store the suggestions in state
 		} catch (error) {
-			console.error("Error fetching summary:", error);
+			console.error("Error fetching analysis:", error);
 		} finally {
 			setLoading(false);
 		}
 	};
+
 
 
 	return (
@@ -550,62 +560,69 @@ John: Sounds good. Let’s set a deadline for next week and track progress daily
 													</video>
 												</Box>
 
-
 												{/* Right: Sentiment & Summary */}
 												<Box flex="1" p="16px">
 													<Text color="white" fontSize="lg" fontWeight="bold">
 														Weekly Team Sync
 													</Text>
-													{/* Sentiment Analysis (Visible after API Response) */}
+													{/* Sentiment Analysis */}
 													{sentiment && (
 														<Text
 															color={sentiment === "Positive" ? "green.400" : sentiment === "Negative" ? "red.400" : "yellow.400"}
 															fontSize="md"
 															mb="4"
 														>
-															Sentiment: {sentiment} 
+															Sentiment: {sentiment}
 														</Text>
 													)}
 
 													{/* Generate Button */}
-													<Button
-														mt="4"
-														bg="#00b890"
-														onClick={handleGenerate}
-														isDisabled={loading}
-													>
-														{loading ? <Spinner size="sm" /> : "Generate Summary & Transcripts"}
+													<Button mt="4" bg="#00b890" onClick={handleGenerate} isDisabled={loading}>
+														{loading ? <Spinner size="sm" /> : "🔍 Analyze & Summarize"}
 													</Button>
 
-													{/* Summary Section (Visible after API Response) */}
+
+													{/* Summary Section */}
 													{summary && (
 														<Box mt="4" p="3" border="1px solid gray" borderRadius="10px">
 															<Text color="white" fontSize="md" fontWeight="bold">
-																Summary:
+																✨ Quick Recap:
 															</Text>
+
 															<Text color="gray.300" fontSize="sm">{summary}</Text>
+														</Box>
+													)}
+
+													{/* Suggestions Section */}
+													{suggestions && (
+														<Box mt="4" p="3" border="1px solid gray" borderRadius="10px">
+															<Text color="white" fontSize="md" fontWeight="bold">
+																🚀 Smart AI Insight:
+															</Text>
+
+															<Text color="gray.300" fontSize="sm">{suggestions}</Text>
 														</Box>
 													)}
 												</Box>
 											</Flex>
+
 											<Divider my="6" borderColor="gray.600" />
 
-											{/* Transcript Section (Visible after API Response) */}
+											{/* Transcript Section */}
 											{summary && (
 												<VStack align="stretch" spacing={3} p="3">
 													<Text color="white" fontSize="md" fontWeight="bold">
 														Transcript:
 													</Text>
 													<Box p="3" border="1px solid gray" borderRadius="10px">
-
 														<Text color="gray.300" fontSize="sm">
 															{transcriptData}
 														</Text>
-
 													</Box>
 												</VStack>
 											)}
 										</ModalBody>
+
 									</ModalContent>
 								</Modal>
 							</Box>

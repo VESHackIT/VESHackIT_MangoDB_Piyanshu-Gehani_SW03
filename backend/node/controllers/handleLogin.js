@@ -5,29 +5,32 @@ const Meeting = require("../models/Meeting");
 
 const createProject = async (req, res) => {
   try {
-    const founderName = req.body.founderName;
-    const founder = await Founder.findOne({ name: founderName });
+    const founder = await Founder.findOne({ name: req.body.founderName });
+
     if (!founder) {
       return res.status(404).json({ error: "Founder not found" });
     }
 
-    const founderId = founder._id;
-    const project = await Project.create({ ...req.body, founder: founderId });
+    console.log("Founder before project creation:", founder);
 
-    // Recalculate impact_score for the founder
-    const newImpactScore = founder.projects.length * 10 + project.fundingGoal; // Example scoring logic
-    founder.impact_score = newImpactScore;
+    // Create the project
+    const project = new Project({ ...req.body, founder: founder._id });
+    await project.save(); // Save project explicitly
 
-    // Add project ID to founder's projects array
+    // Push new project ID to the founder's `projects` array and save
     founder.projects.push(project._id);
     await founder.save();
 
-    return res.status(201).json({ project });
+    console.log("Founder after project update:", await Founder.findById(founder._id));
+
+    return res.status(201).json({ project, message: "Project created and added to founder" });
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 };
+
 
 
 
@@ -59,6 +62,7 @@ const createFounder = async (req, res) => {
 const getFounder = async (req, res) => {
   try {
     const founder = await Founder.findOne({ name: req.params.name });
+    
 
     if (!founder) {
       return res.status(404).json({ message: "Founder not found" });
@@ -146,7 +150,7 @@ const createMeeting = async (req, res) => {
       keyPoints,
       founder: founder._id,
       investors: investors.map((inv) => inv._id),
-      sentiment: "Neutral" // Default value
+      sentiment: "Neutral" ,// Default value
       summary: "", // Default value
       transcripts: "", // Default value
     });
