@@ -17,7 +17,7 @@ const createProject = async (req, res) => {
     await project.save(); // Save project explicitly
 
     // Push new project ID to the founder's `projects` array and save
-    founder.projects.push(project);
+    founder.projects.push(project._id);
     await founder.save();
 
     console.log("Founder after project update:", await Founder.findById(founder._id));
@@ -60,15 +60,27 @@ const createFounder = async (req, res) => {
 const getFounder = async (req, res) => {
   try {
     const founder = await Founder.findOne({ name: req.params.name });
+
     if (!founder) {
       return res.status(404).json({ message: "Founder not found" });
     }
-    return res.status(200).json({ founder });
+
+    // Fetch full project details
+    const projects = await Project.find({ _id: { $in: founder.projects } }).select("-__v -updatedAt");
+
+    // Convert founder document to plain object and replace projects array
+    const founderWithProjects = founder.toObject();
+    founderWithProjects.projects = projects;
+
+    return res.status(200).json({ founder: founderWithProjects });
+
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ err });
+    return res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 };
+
+
 
 const createInvestor = async (req, res) => {
   try {
