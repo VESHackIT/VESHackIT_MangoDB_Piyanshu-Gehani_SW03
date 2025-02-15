@@ -1,0 +1,16 @@
+const mongoose = require("mongoose");
+
+const projectSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    description: { type: String },
+    industry: { type: String },
+    fundingGoal: { type: Number, required: true }, // Goal amount
+    raisedAmount: { type: Number, default: 0 }, // Current investment
+    founder: { type: mongoose.Schema.Types.ObjectId, ref: "Founder", required: true },
+    investors: [{ type: mongoose.Schema.Types.ObjectId, ref: "Investor" }], // Multiple investors
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Project", projectSchema);
