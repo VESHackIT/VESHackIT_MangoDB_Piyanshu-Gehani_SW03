@@ -84,7 +84,7 @@ const openSocialLink = async (url) => {
 const ProjectDetails = () => {
   const { name } = useLocalSearchParams();
   const [project, setProject] = useState(null);
-  console.log("Received name param:", name); 
+  
   useEffect(() => {
     const fetchProject = async () => {
       try {
@@ -102,7 +102,7 @@ const ProjectDetails = () => {
     };
   
     if (name) {
-      console.log("Fetching project with name:", name);
+     
       fetchProject();
     }
   }, [name]);
