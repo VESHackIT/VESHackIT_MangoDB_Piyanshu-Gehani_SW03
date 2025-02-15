@@ -8,10 +8,13 @@ from sentence_transformers import SentenceTransformer
 from PIL import Image
 import google.generativeai as genai
 import os
+import requests
+from bs4 import BeautifulSoup
+import json
 
 # Configure Gemini AI API
 API_KEY = os.getenv("GEMINI_API_KEY")  # Use environment variable for security
-genai.configure(api_key=API_KEY)
+genai.configure(api_key="AIzaSyBBG-TgsliG_sRCGqNWcQ02SwRID9WR7Tg")
 model = genai.GenerativeModel(model_name='gemini-1.5-pro')
 
 # Initialize Flask app
@@ -145,6 +148,58 @@ def search():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+def scrape_google_news(query, count=5):
+    try:
+        url = f"https://www.google.com/search?q={query.replace(' ', '+')}&tbm=nws&tbs=qdr:w"  # Last week filter
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, "html.parser")
+        articles = []
+        seen_urls = set()
+        
+        for container in soup.select("div.SoaBEf"):
+            if len(articles) >= count:
+                break
+                
+            link = container.find("a", href=True)
+            if not link:
+                continue
+                
+            full_link = link["href"]
+            if full_link in seen_urls:
+                continue
+                
+            title_div = container.select_one("div.MBeuO")
+            source_div = container.select_one(".NUnG9d span")
+            
+            if title_div and full_link:
+                seen_urls.add(full_link)
+                articles.append({
+                    "title": title_div.text.strip(),
+                    "url": full_link,
+                    "source": source_div.text if source_div else "Unknown",
+                    "timestamp": container.select_one(".ZE0LJd span").text if container.select_one(".ZE0LJd span") else None
+                })
+        
+        return {"data": articles[:count]}, 200
+    
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+@app.route('/news', methods=['GET'])
+def get_news():
+    keyword = request.args.get('keyword', default='renewable energy')
+    count = request.args.get('count', default=5, type=int)
+    
+    result, status_code = scrape_google_news(keyword, count)
+    return jsonify(result), status_code
 
 
 if __name__ == '__main__':
