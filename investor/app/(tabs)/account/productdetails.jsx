@@ -28,6 +28,9 @@ const ProductDetailsPage = () => {
     loofah: require("../../../assets/images/loofah.jpg"),
     plasticBag: require("../../../assets/images/plasticBag.jpeg"),
     strip: require("../../../assets/images/strip.jpg"),
+    cable: require("../../../assets/images/cable.jpg"),
+    fan: require("../../../assets/images/fan.jpg"),
+    chair: require("../../../assets/images/chair.jpg"),
     // etc...
   };
   const router = useRouter();
