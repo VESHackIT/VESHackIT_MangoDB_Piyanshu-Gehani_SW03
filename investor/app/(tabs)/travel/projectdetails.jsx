@@ -1,18 +1,28 @@
-import { View, Text, Image, ScrollView, ImageBackground, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  ImageBackground,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import RazorpayCheckout from "react-native-razorpay";
+
 import { useLocalSearchParams } from "expo-router";
 import { ProgressBar } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
+import { router } from "expo-router";
+import { FontAwesome } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Linking, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import React, { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp } from 'react-native-feather';
-import { Video } from 'react-native-feather';
-import { ThumbsUp, ThumbsDown } from 'react-native-feather';
+import { ChevronDown, ChevronUp } from "react-native-feather";
+import { Video } from "react-native-feather";
+import { ThumbsUp, ThumbsDown } from "react-native-feather";
 import { Modal, TextInput } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
 const impactIcons = {
   carbonReduction: { icon: "cloud", color: "#4CAF50" }, // Green
@@ -39,7 +49,8 @@ const contact = {
 const dummyProjects = {
   "650f94bfc7e89f001d1e4e5a": {
     name: "Solar Grid for Green Town",
-    description: "A community-driven solar power project aiming to transform Green Town's energy infrastructure. This innovative initiative will install solar panels across public buildings and residential areas, creating a sustainable micro-grid that reduces dependency on fossil fuels while lowering electricity costs for locals. The project will implement the latest photovoltaic technology, ensuring maximum efficiency and durability in various weather conditions. Community members will receive training on basic maintenance, creating local green jobs and fostering a sense of ownership. The environmental impact extends beyond carbon reduction, as it will demonstrate the viability of renewable energy in similar communities across the region.",
+    description:
+      "A community-driven solar power project aiming to transform Green Town's energy infrastructure. This innovative initiative will install solar panels across public buildings and residential areas, creating a sustainable micro-grid that reduces dependency on fossil fuels while lowering electricity costs for locals. The project will implement the latest photovoltaic technology, ensuring maximum efficiency and durability in various weather conditions. Community members will receive training on basic maintenance, creating local green jobs and fostering a sense of ownership. The environmental impact extends beyond carbon reduction, as it will demonstrate the viability of renewable energy in similar communities across the region.",
     targetAmount: 50000,
     raisedAmount: 32000,
     location: "Green Town, India",
@@ -50,17 +61,19 @@ const dummyProjects = {
       trustScore: "8.5/10",
     },
     investors: ["Priya", "Rahul", "Anita", "+154 others"],
-    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9I5m26BeOtJX4wwWXvp0bD0go3kmRDx6RLQ&s",
+    imageUrl:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9I5m26BeOtJX4wwWXvp0bD0go3kmRDx6RLQ&s",
     daysLeft: 15,
     contact: {
       email: "example@example.com",
       linkedin: "https://www.linkedin.com/company/solar-energy-projects-zw",
       instagram: "https://www.instagram.com/primegridsolar",
-    }
+    },
   },
   "650f94bfc7e89f001d1e4e5b": {
     name: "Wind Energy Project",
-    description: "A community-driven solar power project aiming to transform Green Town's energy infrastructure. This innovative initiative will install solar panels across public buildings and residential areas, creating a sustainable micro-grid that reduces dependency on fossil fuels while lowering electricity costs for locals. The project will implement the latest photovoltaic technology, ensuring maximum efficiency and durability in various weather conditions. Community members will receive training on basic maintenance, creating local green jobs and fostering a sense of ownership. The environmental impact extends beyond carbon reduction, as it will demonstrate the viability of renewable energy in similar communities across the region.",
+    description:
+      "A community-driven solar power project aiming to transform Green Town's energy infrastructure. This innovative initiative will install solar panels across public buildings and residential areas, creating a sustainable micro-grid that reduces dependency on fossil fuels while lowering electricity costs for locals. The project will implement the latest photovoltaic technology, ensuring maximum efficiency and durability in various weather conditions. Community members will receive training on basic maintenance, creating local green jobs and fostering a sense of ownership. The environmental impact extends beyond carbon reduction, as it will demonstrate the viability of renewable energy in similar communities across the region.",
     targetAmount: 75000,
     raisedAmount: 50000,
     location: "Blue City, India",
@@ -71,7 +84,8 @@ const dummyProjects = {
       trustScore: "9/10",
     },
     investors: ["Amit", "Neha", "Karan", "+230 others"],
-    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTK-W-QAu_Gpf7GW7m21q8wSPUMATtrlzw_w&s",
+    imageUrl:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTK-W-QAu_Gpf7GW7m21q8wSPUMATtrlzw_w&s",
     daysLeft: 20,
     contact: {
       email: "example@example.com",
@@ -98,11 +112,11 @@ const calculateSatisfactionScore = (likes, dislikes) => {
 // Function to determine color based on satisfaction score
 const getSatisfactionColor = (score) => {
   if (score < 50) {
-    return 'text-red-500'; // Low
+    return "text-red-500"; // Low
   } else if (score >= 50 && score < 80) {
-    return 'text-yellow-500'; // Normal
+    return "text-yellow-500"; // Normal
   } else {
-    return 'text-green-500'; // High
+    return "text-green-500"; // High
   }
 };
 
@@ -115,7 +129,9 @@ const MeetingSummaryCard = ({ likes, dislikes }) => {
 
   return (
     <View className="bg-[#1e293b] p-4 rounded-lg my-4">
-      <Text className="text-white text-lg font-medium mb-2">Meeting Summary</Text>
+      <Text className="text-white text-lg font-medium mb-2">
+        Meeting Summary
+      </Text>
 
       <View className="flex-row justify-between items-center">
         {/* Left Side: Likes and Dislikes */}
@@ -145,25 +161,26 @@ const ProjectDetails = () => {
   const [project, setProject] = useState(null);
   const [progresss, setProgress] = useState(null);
   const [selectedPhase, setSelectedPhase] = useState(0);
-  const specificProjectId = "67b1171fce8bc715a288befc"; // Replace with your specific project ID
+  const specificProjectId = "67b17f1722307e215e0e56fe"; // Replace with your specific project ID
   const specificPhaseIndex = 0; // Replace with your specific phase index
   const [investModalVisible, setInvestModalVisible] = useState(false);
-  const [investmentAmount, setInvestmentAmount] = useState('');
+  const [investmentAmount, setInvestmentAmount] = useState("");
 
   // Check if the current project and phase match the specific ones
-  const showDislikeButton = project?._id === specificProjectId && selectedPhase === specificPhaseIndex;
+  const showDislikeButton =
+    project?._id === specificProjectId && selectedPhase === specificPhaseIndex;
 
   const statusColors = {
-    'completed': '#00b890',
-    'in-progress': '#f39c12',
-    'pending': '#95a5a6'
+    completed: "#00b890",
+    "in-progress": "#f39c12",
+    pending: "#95a5a6",
   };
   const handleMeetingVideo = () => {
     // Open the meeting video link
     const meetUri = progresss[selectedPhase].meetUri;
 
     Linking.openURL(meetUri).catch((err) =>
-      console.error('Failed to open URL:', err)
+      console.error("Failed to open URL:", err)
     );
   };
   const handleViewReport = () => {
@@ -172,16 +189,16 @@ const ProjectDetails = () => {
 
     // Open the document using the URL
     Linking.openURL(reportUri).catch((err) =>
-      console.error('Failed to open URL:', err)
+      console.error("Failed to open URL:", err)
     );
   };
   const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1).replace('-', ' ');
+    return string.charAt(0).toUpperCase() + string.slice(1).replace("-", " ");
   };
 
-  const handlePayment = async () => {
+  const handlePayment = async async() => {
     if (!investmentAmount || isNaN(investmentAmount) || investmentAmount <= 0) {
-      Alert.alert('Invalid Amount', 'Please enter a valid investment amount');
+      Alert.alert("Invalid Amount", "Please enter a valid investment amount");
       return;
     }
   
@@ -214,8 +231,69 @@ const ProjectDetails = () => {
       Alert.alert("Success", `Investment of ₹${investmentAmount} successful!`);
   
       // Reset modal and input
+  
+    const options = {
+      description: "Sample Payment",
+      image: "https://your-company-logo.png",
+      currency: "INR",
+      key: "rzp_test_8UI7bsbK3t9prX", // Replace with your actual key
+      amount: `${investmentAmount * 100}`, // Amount in paise (10000 = ₹100)
+      name: `${project.name}`,
+      prefill: {
+        email: "user@example.com",
+        contact: "9999999999",
+        name: "John Doe",
+      },
+      theme: { color: "#F37254" },
+    };
+
+    RazorpayCheckout.open(options)
+      .then((data) => {
+        Alert.alert(
+          "Payment Successful",
+          `Payment Id: ${data.razorpay_payment_id}`
+        );
+      })
+      .catch((error) => {
+        Alert.alert("Payment Failed", error.description);
+      });
+    setInvestModalVisible(false);
+    setInvestmentAmount("");
+    if (!project || !project.name || !project.investors || project.investors.length === 0) {
+      Alert.alert('Error', 'Project details are missing or no investors found');
+      return;
+    }
+  
+    try {
+      // Step 2: Send funding request
+      const fundResponse = await fetch("http://localhost:5002/project/fund", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          projName: project.name,
+  
+          fundAmt: parseFloat(investmentAmount)
+        })
+      });
+  
+      const fundData = await fundResponse.json();
+  
+      if (!fundResponse.ok) {
+        throw new Error(fundData.error || "Funding failed");
+      }
+  
+      console.log("Funding successful:", fundData);
+      Alert.alert("Success, Investment of ₹${investmentAmount} successful!");
+  
+      // Reset modal and input
       setInvestModalVisible(false);
-      setInvestmentAmount('');
+        setInvestmentAmount('');
+    } catch (error) {
+      console.error("Error in funding:", error);
+      Alert.alert("Error", error.message);
+    }
     } catch (error) {
       console.error("Error in funding:", error);
       Alert.alert("Error", error.message);
@@ -226,13 +304,15 @@ const ProjectDetails = () => {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://192.168.39.152:5002/login/project/${name}`);
+        const response = await fetch(
+          `http://localhost:5002/login/project/${name}`
+        );
         const data = await response.json();
 
         if (response.ok && data.project) {
           setProject(data.project); // ✅ Set project using nested object
           console.log(data.project);
-          setProgress(data.project.progress)
+          setProgress(data.project.progress);
         } else {
           console.error("Project not found:", data);
         }
@@ -242,13 +322,18 @@ const ProjectDetails = () => {
     };
 
     if (name) {
-
       fetchProject();
     }
   }, [name]);
 
   const handleDislike = async () => {
     try {
+      const res = await fetch("https://piyanshu.app.n8n.cloud/webhook/8d8dd1ac-c475-4716-a578-0cca33b3183b", { 
+        method: 'POST'
+      });
+      console.log(res);
+      
+
       // Update the dislikes count
       const updatedProgresss = [...progresss];
       updatedProgresss[selectedPhase].meetDislikes += 1;
@@ -291,7 +376,9 @@ const ProjectDetails = () => {
   if (!project) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-100">
-        <Text className="text-lg font-bold text-red-500">Project Not Found</Text>
+        <Text className="text-lg font-bold text-red-500">
+          Project Not Found
+        </Text>
       </View>
     );
   }
@@ -313,8 +400,10 @@ const ProjectDetails = () => {
   };
 
   return (
-    <ScrollView style={{ backgroundColor: theme.background }} className="flex-1">
-
+    <ScrollView
+      style={{ backgroundColor: theme.background }}
+      className="flex-1"
+    >
       {/* Hero Section with Faded Image */}
       <View className="relative rounded-b-3xl overflow-hidden">
         <ImageBackground
@@ -323,16 +412,20 @@ const ProjectDetails = () => {
           resizeMode="cover"
         >
           <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.7)']}
+            colors={["transparent", "rgba(0,0,0,0.7)"]}
             className="absolute bottom-0 left-0 right-0 h-24"
           />
         </ImageBackground>
 
         {/* Overlapping Title Card */}
         <View className="absolute bottom-0 left-0 right-0 px-5 pb-6">
-          <Text className="text-3xl font-pbold text-white shadow-text">{project.name}</Text>
+          <Text className="text-3xl font-pbold text-white shadow-text">
+            {project.name}
+          </Text>
           <View className="flex-row items-center mt-1">
-            <Text className="text-sm text-white mr-2">📍 Mumbai, Maharashtra</Text>
+            <Text className="text-sm text-white mr-2">
+              📍 Mumbai, Maharashtra
+            </Text>
           </View>
         </View>
       </View>
@@ -345,9 +438,7 @@ const ProjectDetails = () => {
             <Text style={[styles.raisedAmount, { color: "#ffffff" }]}>
               ₹{project.raisedAmount.toLocaleString()}
             </Text>
-            <Text
-              style={[styles.targetAmount, { color: theme.inactive }]}
-            >
+            <Text style={[styles.targetAmount, { color: theme.inactive }]}>
               / ₹{project.fundingGoal.toLocaleString()}
             </Text>
           </View>
@@ -373,7 +464,8 @@ const ProjectDetails = () => {
                         right: index * 12,
                         backgroundColor: theme.surface,
                       },
-                    ]}>
+                    ]}
+                  >
                     <Image
                       source={{
                         uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmI57giWxjA-WXBTE7HIzLV0Y9YcEnxIyrCQ&s",
@@ -383,9 +475,7 @@ const ProjectDetails = () => {
                   </View>
                 ))}
               </View>
-              <Text
-                style={[styles.investorCount, { color: theme.inactive }]}
-              >
+              <Text style={[styles.investorCount, { color: theme.inactive }]}>
                 +220 others
               </Text>
             </View>
@@ -395,33 +485,45 @@ const ProjectDetails = () => {
           style={[styles.detailsButton, { backgroundColor: theme.primary }]}
           onPress={() => setInvestModalVisible(true)}
         >
-          <Text style={[styles.buttonText, { color: theme.background }]}>Invest</Text>
+          <Text style={[styles.buttonText, { color: theme.background }]}>
+            Invest
+          </Text>
         </TouchableOpacity>
 
         {/* Description */}
         <View>
-          <Text className="text-xl font-bold text-white my-3">About This Project</Text>
-          <Text style={[styles.description, { color: "#c3cfe2" }]} className="text-base text-white leading-7 tracking-wide">
+          <Text className="text-xl font-bold text-white my-3">
+            About This Project
+          </Text>
+          <Text
+            style={[styles.description, { color: "#c3cfe2" }]}
+            className="text-base text-white leading-7 tracking-wide"
+          >
             {project.description}
           </Text>
         </View>
 
-        <Text className="text-white text-2xl font-semibold my-6">Project Progress</Text>
+        <Text className="text-white text-2xl font-semibold my-6">
+          Project Progress
+        </Text>
 
         <View className="p-4 bg-[#131d2a] flex-1">
-
           {/* Phase Tabs */}
           <View className="flex-row mb-6">
             {progresss.map((phase, index) => (
               <TouchableOpacity
                 key={index}
-                className={`flex-1 items-center pb-2 border-b-2 ${selectedPhase === index ? 'border-[#00b890]' : 'border-transparent'
-                  }`}
+                className={`flex-1 items-center pb-2 border-b-2 ${
+                  selectedPhase === index
+                    ? "border-[#00b890]"
+                    : "border-transparent"
+                }`}
                 onPress={() => setSelectedPhase(index)}
               >
                 <Text
-                  className={`text-white text-lg ${selectedPhase === index ? 'text-[#00b890] font-bold' : ''
-                    }`}
+                  className={`text-white text-lg ${
+                    selectedPhase === index ? "text-[#00b890] font-bold" : ""
+                  }`}
                 >
                   P{index + 1}
                 </Text>
@@ -432,8 +534,12 @@ const ProjectDetails = () => {
             <View className="flex-row justify-between items-center">
               {/* Left Side: Meeting Details */}
               <View>
-                <Text className="text-white text-lg font-medium">Recent Meeting</Text>
-                <Text className="text-gray-400 text-sm">27/ 02/ 2025 , MONDAY</Text>
+                <Text className="text-white text-lg font-medium">
+                  Recent Meeting
+                </Text>
+                <Text className="text-gray-400 text-sm">
+                  27/ 02/ 2025 , MONDAY
+                </Text>
               </View>
 
               {/* Right Side: Meeting Icon Button */}
@@ -453,7 +559,7 @@ const ProjectDetails = () => {
               <Text className="text-white font-bold">Status</Text>
             </View>
             <ScrollView>
-              {progresss[selectedPhase].tasks.map((task, taskIndex) => (
+            {progresss[selectedPhase].tasks.map((task, taskIndex) => (
                 <View
                   key={taskIndex}
                   className="flex-row justify-between items-center p-4 border-b border-[#2d3a4b]"
@@ -487,10 +593,11 @@ const ProjectDetails = () => {
             </ScrollView>
             <View className="flex-row justify-end mt-4 space-x-4">
               {/* Like Icon (Non-clickable) */}
-              {showDislikeButton && (<View className="flex-row items-center">
-                <ThumbsUp stroke="#00b890" width={24} height={24} />
-
-              </View>)}
+              {showDislikeButton && (
+                <View className="flex-row items-center">
+                  <ThumbsUp stroke="#00b890" width={24} height={24} />
+                </View>
+              )}
 
               {/* Dislike Icon (Clickable) */}
               {showDislikeButton && (
@@ -499,7 +606,6 @@ const ProjectDetails = () => {
                   onPress={handleDislike}
                 >
                   <ThumbsDown stroke="#ff4444" width={24} height={24} />
-
                 </TouchableOpacity>
               )}
             </View>
@@ -516,11 +622,14 @@ const ProjectDetails = () => {
           </TouchableOpacity>
         </View>
 
-
-        <Text className="text-xl font-pbold text-white my-5">Project Impact</Text>
+        <Text className="text-xl font-pbold text-white my-5">
+          Project Impact
+        </Text>
         {/* Impact Metrics Cards */}
         <View className="flex-row flex-wrap justify-between">
-          {Object.entries(dummyProjects["650f94bfc7e89f001d1e4e5a"].impactMetrics).map(([key, value]) => (
+          {Object.entries(
+            dummyProjects["650f94bfc7e89f001d1e4e5a"].impactMetrics
+          ).map(([key, value]) => (
             <View
               key={key}
               style={[styles.card, { backgroundColor: theme.surface }]}
@@ -535,7 +644,10 @@ const ProjectDetails = () => {
               />
 
               {/* Text Content */}
-              <Text style={[styles.description, { color: "#c3cfe2" }]} className="text-xs uppercase font-medium tracking-wide text-gray-700 text-center">
+              <Text
+                style={[styles.description, { color: "#c3cfe2" }]}
+                className="text-xs uppercase font-medium tracking-wide text-gray-700 text-center"
+              >
                 {key.replace(/([A-Z])/g, " $1").trim()}
               </Text>
               <Text className="text-lg font-semibold text-white text-center mt-1">
@@ -545,12 +657,16 @@ const ProjectDetails = () => {
           ))}
         </View>
 
-
-
         <View className="pb-3">
-          <Text className="text-xl font-bold text-white mb-3">Contact for More Info</Text>
+          <Text className="text-xl font-bold text-white mb-3">
+            Contact for More Info
+          </Text>
           <View className="flex-row items-center gap-x-4">
-            <TouchableOpacity onPress={() => openSocialLink(contact.email ? `mailto:${contact.email}` : "#")}>
+            <TouchableOpacity
+              onPress={() =>
+                openSocialLink(contact.email ? `mailto:${contact.email}` : "#")
+              }
+            >
               <FontAwesome name="envelope" size={24} color="gray" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => openSocialLink(contact.linkedin)}>
@@ -561,8 +677,6 @@ const ProjectDetails = () => {
             </TouchableOpacity>
           </View>
         </View>
-
-
       </View>
       <Modal
         animationType="slide"
@@ -573,7 +687,9 @@ const ProjectDetails = () => {
         <View className="flex-1 justify-end bg-[#00000099]">
           <View className="bg-[#131d2a] p-6 rounded-t-3xl">
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-2xl font-bold text-white">Invest in {project.name}</Text>
+              <Text className="text-2xl font-bold text-white">
+                Invest in {project.name}
+              </Text>
               <TouchableOpacity onPress={() => setInvestModalVisible(false)}>
                 <Ionicons name="close" size={24} color="#ffffff" />
               </TouchableOpacity>
@@ -793,6 +909,5 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
 });
-
 
 export default ProjectDetails;

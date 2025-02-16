@@ -4,7 +4,7 @@ const Founder = require("../models/Founder");
 const fundProject = async (req, res) => {
   try {
     const { projName, fundAmt } = req.body;
-
+    console.log("entered fundProject");
     // Find the project
     const project = await Project.findOne({ name: projName });
     if (!project) {
