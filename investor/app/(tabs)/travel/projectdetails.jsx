@@ -179,20 +179,54 @@ const ProjectDetails = () => {
     return string.charAt(0).toUpperCase() + string.slice(1).replace('-', ' ');
   };
 
-  const handlePayment = () => {
-    if (!investmentAmount || isNaN(investmentAmount)) {
+  const handlePayment = async () => {
+    if (!investmentAmount || isNaN(investmentAmount) || investmentAmount <= 0) {
       Alert.alert('Invalid Amount', 'Please enter a valid investment amount');
       return;
     }
-    console.log(`Investing ₹${investmentAmount}`);
-    setInvestModalVisible(false);
-    setInvestmentAmount('');
+  
+    if (!project || !project.name || !project.investors || project.investors.length === 0) {
+      Alert.alert('Error', 'Project details are missing or no investors found');
+      return;
+    }
+  
+    try {
+      // Step 2: Send funding request
+      const fundResponse = await fetch("http://192.168.39.152:5002/project/fund", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          projName: project.name,
+  
+          fundAmt: parseFloat(investmentAmount)
+        })
+      });
+  
+      const fundData = await fundResponse.json();
+  
+      if (!fundResponse.ok) {
+        throw new Error(fundData.error || "Funding failed");
+      }
+  
+      console.log("Funding successful:", fundData);
+      Alert.alert("Success", `Investment of ₹${investmentAmount} successful!`);
+  
+      // Reset modal and input
+      setInvestModalVisible(false);
+      setInvestmentAmount('');
+    } catch (error) {
+      console.error("Error in funding:", error);
+      Alert.alert("Error", error.message);
+    }
   };
+  
 
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(`http://localhost:5002/login/project/${name}`);
+        const response = await fetch(`http://192.168.39.152:5002/login/project/${name}`);
         const data = await response.json();
 
         if (response.ok && data.project) {
@@ -233,7 +267,7 @@ const ProjectDetails = () => {
         );
   
         // Call the refund API
-        const response = await fetch(`http://localhost:5002/refund/${project.name}`, {
+        const response = await fetch(`http://192.168.39.152:5002/refund/${project.name}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -424,11 +458,21 @@ const ProjectDetails = () => {
                   key={taskIndex}
                   className="flex-row justify-between items-center p-4 border-b border-[#2d3a4b]"
                 >
-                  <Text className="text-white">{task.title}</Text>
+                  <Text 
+                    className="text-white flex-1 mr-2" 
+                    numberOfLines={1} 
+                    ellipsizeMode="tail" // Truncate with an ellipsis
+                  >
+                    {task.title}
+                  </Text>
+
+                  {/* Task Status */}
                   <View
                     className="px-2.5 py-1 rounded-full"
                     style={{
                       backgroundColor: `${statusColors[task.status]}20`,
+                      minWidth: 80, // Fixed width for status
+                      alignItems: 'center', // Center text horizontally
                     }}
                   >
                     <Text

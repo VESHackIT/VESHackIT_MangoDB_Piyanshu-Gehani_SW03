@@ -122,6 +122,18 @@ const getInvestor = async (req, res) => {
   }
 };
 
+const getInvestorById = async (req, res) => {
+  try {
+    const investor = await Investor.findById(req.params.id);
+    if (!investor) {
+      return res.status(404).json({ message: "Investor not found" });
+    }
+    return res.status(200).json({ investor });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message || "Internal Server Error" });
+  }
+};
 
 const createMeeting = async (req, res) => {
   try {
@@ -183,5 +195,6 @@ module.exports = {
   createInvestor,
   getInvestor,
   createMeeting,
-  getAllProjects
+  getAllProjects,
+  getInvestorById
 };
