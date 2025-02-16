@@ -193,7 +193,7 @@ function Dashboard() {
 	console.log("Submitting Project Data:", projectPayload);
   
 	try {
-	  const response = await fetch("http://localhost:5001/login/project", {
+	  const response = await fetch("http://localhost:5002/login/project", {
 		method: "POST",
 		headers: {
 		  "Content-Type": "application/json",
@@ -253,7 +253,7 @@ John: Sounds good. Let’s set a deadline for next week and track progress daily
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch("http://localhost:5001/login/founder/Piyanshu");
+				const response = await fetch("http://localhost:5002/login/founder/Piyanshu");
 				const data = await response.json();
 				console.log("Data:", data);
 				setFounderData(data.founder);
@@ -583,7 +583,7 @@ John: Sounds good. Let’s set a deadline for next week and track progress daily
 													color={project.raisedAmount >= project.fundingGoal ? 'green.400' : 'yellow.400'}
 													fontSize='sm'
 													fontWeight='bold'>
-													{project.raisedAmount >= project.fundingGoal ? 'Active' : 'Pending'}
+													{project.raisedAmount >= project.fundingGoal ? 'Completed' : 'Pending'}
 												</Text>
 											</Flex>
 										</Flex>

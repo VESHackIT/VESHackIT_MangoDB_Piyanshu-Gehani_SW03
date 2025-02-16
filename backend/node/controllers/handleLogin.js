@@ -13,8 +13,54 @@ const createProject = async (req, res) => {
 
     console.log("Founder before project creation:", founder);
 
+    // Default initial progress phase
+    const initialProgress = [
+      {
+        phaseName: "Research & Feasibility",
+        tasks: [
+          { title: "Assess Water Flow & Potential Sites", status: "completed" },
+          { title: "Conduct Environmental Impact Study", status: "completed" },
+          { title: "Obtain Government Approvals", status: "in-progress" },
+          { title: "Analyze Economic Viability", status: "pending" },
+        ],
+        reportUri: "https://drive.google.com/file/d/1ABCxyz123/view?usp=sharing",
+        meetUri: "https://drive.google.com/file/d/1SV-idaAp-sTlxsaURkO2VtAij3b8Hjib/view?usp=sharing",
+        meetLikes: 19,
+        meetDislikes: 8,
+        satisfaction: 60,
+      },
+    ];
+
+    // Extract optional fields with default values if not provided
+    const {
+      shortDescription = "",
+      description = "",
+      industry = "",
+      imageUri = "",
+      fundingGoal,
+      raisedAmount = 0,
+      investors = [],
+      sustainability_score = 0,
+      trustScore = 0,
+      progress = initialProgress, // Default to initial progress phase
+    } = req.body;
+
     // Create the project
-    const project = new Project({ ...req.body, founder: founder._id });
+    const project = new Project({
+      name: req.body.name,
+      shortDescription,
+      description,
+      industry,
+      imageUri,
+      fundingGoal,
+      raisedAmount,
+      founder: founder._id,
+      investors,
+      sustainability_score,
+      trustScore,
+      progress,
+    });
+
     await project.save(); // Save project explicitly
 
     // Push new project ID to the founder's `projects` array and save
