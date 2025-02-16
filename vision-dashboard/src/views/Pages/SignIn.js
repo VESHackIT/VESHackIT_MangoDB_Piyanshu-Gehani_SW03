@@ -50,24 +50,63 @@ function SignIn() {
     }
   };
 
-  const handleVerification = () => {
-    setIsVerifying(true);
-    // Simulate verification process
-    setTimeout(() => {
-      setIsVerifying(false);
-      setIsVerified(true);
+  const handleVerification = async () => {
+    if (!bankStatement) {
       toast({
-        title: "Verification complete",
-        description: "Bank statement has been verified successfully.",
-        status: "success",
+        title: "Error",
+        description: "Please upload a bank statement before verifying.",
+        status: "error",
         duration: 3000,
       });
-      setTimeout(() => {
-        window.location.href="/#admin/dashboard";
-      }, 1000);
-    }, 4000);
+      return;
+    }
+  
+    setIsVerifying(true);
+  
+    const formData = new FormData();
+    formData.append("file", bankStatement);
+  
+    try {
+      const response = await fetch("http://127.0.0.1:5005/validate-statement", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const result = await response.json();
+      const verdict = result.validation_result.includes("NOT AUTHENTIC")
+        ? "NOT LEGITIMATE"
+        : "LEGITIMATE";
+      
+        console.log(result, verdict);
+  
+      if (verdict === "LEGITIMATE") {
+        setIsVerified(true);
+        toast({
+          title: "Verification Complete",
+          description: "Bank statement has been verified successfully.",
+          status: "success",
+          duration: 3000,
+        });
+  
+        setTimeout(() => {
+          window.location.href = "/#admin/dashboard";
+        }, 1000);
+      } else {
+        throw new Error("Verification failed. The statement is NOT LEGITIMATE.");
+      }
+    } catch (error) {
+      toast({
+        title: "Verification Failed",
+        description: error.message || "An error occurred while verifying.",
+        status: "error",
+        duration: 3000,
+      });
+    } finally {
+      setIsVerifying(false);
+    }
   };
-
+  
+  
   const renderFormStep = () => {
     switch(step) {
       case 1:
