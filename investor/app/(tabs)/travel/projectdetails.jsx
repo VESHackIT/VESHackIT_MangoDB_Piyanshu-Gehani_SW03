@@ -259,6 +259,12 @@ const ProjectDetails = () => {
 
   const handleDislike = async () => {
     try {
+      const res = await fetch("https://piyanshu.app.n8n.cloud/webhook/8d8dd1ac-c475-4716-a578-0cca33b3183b", { 
+        method: 'POST'
+      });
+      console.log(res);
+      
+
       // Update the dislikes count
       const updatedProgresss = [...progresss];
       updatedProgresss[selectedPhase].meetDislikes += 1;

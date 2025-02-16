@@ -112,7 +112,7 @@ export default function InvestmentGrid() {
                 {redeemed ? 'Reward Redeemed!' : ' Congratulations! '}
               </Text>
               <Text className="text-white text-base text-center mb-5">
-                {redeemed ? "You've successfully claimed your reward! 🌱" : "You've earned a reward!"}
+                {redeemed ? "You can now use 12 credits in your electricity bill 🌱" : "You've earned a reward!"}
               </Text>
               <TouchableOpacity
                 className="bg-[#131d2a] py-3 px-8 rounded-lg"
