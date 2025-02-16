@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, FlatList, View, Text, TouchableOpacity, Image, SafeAreaView, Modal, TextInput, ActivityIndicator, Dimensions } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, SafeAreaView, Modal, Dimensions, ActivityIndicator, Image, TextInput } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { router } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -73,6 +73,7 @@ export default function CommunitySection() {
   const [newsData, setNewsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedNews, setSelectedNews] = useState(null);
 
   // Fetch news data from backend
   useEffect(() => {
@@ -158,9 +159,76 @@ export default function CommunitySection() {
     </TouchableOpacity>
   );
 
+  const NewsModal = () => {
+    const [webViewLoading, setWebViewLoading] = useState(true);
+    const [webViewError, setWebViewError] = useState(false);
+  
+    const handleWebViewLoad = () => {
+      setWebViewLoading(false);
+      setWebViewError(false);
+    };
+  
+    const handleWebViewError = () => {
+      setWebViewLoading(false);
+      setWebViewError(true);
+    };
+  
+    return (
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={!!selectedNews}
+        onRequestClose={() => setSelectedNews(null)}
+      >
+        <SafeAreaView className="flex-1 bg-[#0a0f1a]">
+          <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-700">
+            <TouchableOpacity onPress={() => setSelectedNews(null)}>
+              <Ionicons name="close" size={28} color="#00b890" />
+            </TouchableOpacity>
+            <Text className="text-white text-lg font-semibold">
+              {selectedNews?.source}
+            </Text>
+            <View style={{ width: 28 }} /> {/* Spacer for alignment */}
+          </View>
+  
+          {selectedNews && (
+            <View style={{ flex: 1 }}>
+              {webViewLoading && (
+                <View className="flex-1 justify-center items-center bg-[#0a0f1a]">
+                  <ActivityIndicator size="large" color="#00b890" />
+                  <Text className="text-white mt-2">Loading news...</Text>
+                </View>
+              )}
+  
+              {webViewError && (
+                <View className="flex-1 justify-center items-center bg-[#0a0f1a]">
+                  <Text className="text-white">Failed to load news.</Text>
+                  <TouchableOpacity
+                    onPress={() => setWebViewError(false)}
+                    className="mt-4 bg-[#00b890] px-4 py-2 rounded-lg"
+                  >
+                    <Text className="text-white">Retry</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+  
+              <WebView
+                source={{ uri: selectedNews.url }}
+                style={{ flex: 1, display: webViewLoading || webViewError ? 'none' : 'flex' }}
+                onLoad={handleWebViewLoad}
+                onError={handleWebViewError}
+              />
+            </View>
+          )}
+        </SafeAreaView>
+      </Modal>
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: '#0a0f1a' }}>
       <ScrollView className='mt-10'>
+        {/* Investments Section */}
         <View className="py-6">
           <Text className="text-2xl px-5 mb-4 text-white font-semibold">Your Renewable Investments</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="pl-5">
@@ -186,62 +254,62 @@ export default function CommunitySection() {
         </View>
 
         {/* News Section */}
-        {/* News Section */}
-<View className="py-6">
-  <Text className="text-2xl px-5 mb-4 text-white font-semibold">Latest Renewable Energy News</Text>
-  {loading ? (
-    <ActivityIndicator size="large" color="#00b890" />
-  ) : error ? (
-    <Text className="text-red-500 px-5">{error}</Text>
-  ) : (
-    <ScrollView 
-      horizontal 
-      showsHorizontalScrollIndicator={false} 
-      className="pl-5"
-      contentContainerStyle={{ paddingRight: 20 }}
-    >
-      {newsData.map((news, index) => (
-        <TouchableOpacity
-          key={index}
-          className="rounded-xl mr-4 overflow-hidden"
-          style={{ 
-            width: width * 0.85,
-            backgroundColor: '#172233',
-            borderLeftWidth: 4,
-            borderLeftColor: '#00b890'
-          }}
-          activeOpacity={0.9}
-        >
-          <View className="p-5 h-40 justify-between">
-            <View>
-              <Text 
-                className="text-white text-lg font-bold mb-2" 
-                numberOfLines={2}
-                style={{ lineHeight: 24 }}
-              >
-                {news.title}
-              </Text>
-              <Text className="text-[#00b890] text-sm font-medium">
-                {news.source}
-              </Text>
-            </View>
-            
-            <View className="flex-row justify-between items-center">
-              <Text className="text-gray-400 text-xs">
-                {news.timestamp}
-              </Text>
-              <MaterialIcons 
-                name="arrow-forward" 
-                size={20} 
-                color="#00b890" 
-              />
-            </View>
-          </View>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  )}
-</View>
+        <View className="py-6">
+          <Text className="text-2xl px-5 mb-4 text-white font-semibold">Latest Renewable Energy News</Text>
+          {loading ? (
+            <ActivityIndicator size="large" color="#00b890" />
+          ) : error ? (
+            <Text className="text-red-500 px-5">{error}</Text>
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="pl-5"
+              contentContainerStyle={{ paddingRight: 20 }}
+            >
+              {newsData.map((news, index) => (
+                <TouchableOpacity
+                  key={index}
+                  className="rounded-xl mr-4 overflow-hidden"
+                  style={{
+                    width: width * 0.85,
+                    backgroundColor: '#172233',
+                    borderLeftWidth: 4,
+                    borderLeftColor: '#00b890'
+                  }}
+                  activeOpacity={0.9}
+                  onPress={() => setSelectedNews(news)}
+                >
+                  <View className="p-5 h-40 justify-between">
+                    <View>
+                      <Text
+                        className="text-white text-lg font-bold mb-2"
+                        numberOfLines={2}
+                        style={{ lineHeight: 24 }}
+                      >
+                        {news.title}
+                      </Text>
+                      <Text className="text-[#00b890] text-sm font-medium">
+                        {news.source}
+                      </Text>
+                    </View>
+
+                    <View className="flex-row justify-between items-center">
+                      <Text className="text-gray-400 text-xs">
+                        {news.timestamp}
+                      </Text>
+                      <MaterialIcons
+                        name="arrow-forward"
+                        size={20}
+                        color="#00b890"
+                      />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+        </View>
 
         {/* Community Discussions Section */}
         <View className="px-5 py-6">
@@ -251,6 +319,9 @@ export default function CommunitySection() {
           ))}
         </View>
       </ScrollView>
+
+      {/* News Modal */}
+      <NewsModal />
 
       {/* Add Discussion Button */}
       <TouchableOpacity

@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Modal, Animated, Platform } from 'react-native';
+import { View, Text, Dimensions, TouchableOpacity, Modal, Animated, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const GRID_SIZE = 4;
-const CELL_MARGIN = 2;
+const CELL_MARGIN = 5;
 const { width } = Dimensions.get('window');
-const CELL_SIZE = (width - 40) / GRID_SIZE - CELL_MARGIN * 2;
+const CELL_SIZE = (width - 50) / GRID_SIZE - CELL_MARGIN * 2;
+const investments = [0, 1, 2];
 
-const investments = [0, 1, 2]; // Hardcoded positions of tree investments (0-indexed)
+// Sample leaderboard data
+const leaderboardData = [
+  { name: "Sarah Miller", carbonSaved: 2450 },
+  { name: "John Davis", carbonSaved: 1890 },
+  { name: "Emma Wilson", carbonSaved: 1670 },
+  { name: "Michael Chen", carbonSaved: 1450 },
+  { name: "Lisa Thompson", carbonSaved: 1230 }
+];
 
 export default function InvestmentGrid() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -40,161 +49,83 @@ export default function InvestmentGrid() {
     ]).start();
   };
 
+  const renderLeaderboardItem = (item, index) => (
+    <View key={index} className="flex-row items-center bg-[#131d2a] rounded-xl p-3 mb-2">
+      <View className="w-8 h-8 rounded-full bg-[#00b890] justify-center items-center mr-3">
+        <Text className="text-white font-bold text-base">{index + 1}</Text>
+      </View>
+      <View className="flex-1">
+        <Text className="text-white text-base font-semibold">{item.name}</Text>
+        <Text className="text-[#00b890] text-sm">{item.carbonSaved} kg CO₂ saved</Text>
+      </View>
+      {index < 3 && (
+        <MaterialCommunityIcons 
+          name="medal" 
+          size={24} 
+          color={index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'} 
+        />
+      )}
+    </View>
+  );
+
   const renderCell = (index) => {
     const hasInvestment = investments.includes(index);
-
     return (
       <TouchableOpacity
         key={index}
-        style={[styles.cell, hasInvestment && styles.investedCell]}
+        className={`justify-center items-center rounded-lg m-1 ${hasInvestment ? 'bg-[#00b890]' : 'bg-white/10'}`}
+        style={{ width: CELL_SIZE, height: CELL_SIZE }}
         activeOpacity={0.7}
         onPress={hasInvestment ? openModal : null}
       >
-        {hasInvestment && <Text style={styles.tree}>🌳</Text>}
+        {hasInvestment && <MaterialCommunityIcons name="tree" size={CELL_SIZE * 0.6} color="#FFF" />}
       </TouchableOpacity>
     );
   };
 
   return (
-    <LinearGradient colors={['#0a0f1a', '#131d2a']} style={styles.container}>
-      <Text style={styles.title}>Investment Grid</Text>
-      <Text style={styles.subtitle}>Active Investments: 3</Text>
+    <LinearGradient colors={['#0a0f1a', '#131d2a']} className="flex-1 p-5">
+      <ScrollView className="mb-5 mt-10">
+        <Text className="text-white text-2xl font-pbold mb-4">Carbon Savings Leaderboard</Text>
+        {leaderboardData.map((item, index) => renderLeaderboardItem(item, index))}
+  
 
-      <View style={styles.gridContainer}>
+      <View className="bg-[#131d2a] rounded-xl p-3 mt-6">
+        <Text className="text-white text-lg font-psemibold mb-3">Investment Grid</Text>
         {Array(GRID_SIZE)
           .fill()
           .map((_, row) => (
-            <View key={row} style={styles.row}>
+            <View key={row} className="flex-row mb-1">
               {Array(GRID_SIZE)
                 .fill()
                 .map((_, col) => renderCell(row * GRID_SIZE + col))}
             </View>
           ))}
       </View>
+      </ScrollView>
 
-      {/* Reward Modal */}
       <Modal visible={modalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <Animated.View style={[styles.modalContent, { opacity: fadeAnim }]}>
-            {!redeemed ? (
-              <>
-                <Text style={styles.modalTitle}>🎉 Congratulations! 🎉</Text>
-                <Text style={styles.modalText}>You've earned a reward!</Text>
-                <TouchableOpacity style={styles.redeemButton} onPress={redeemReward}>
-                  <LinearGradient colors={['#00b890', '#009977']} style={styles.redeemGradient}>
-                    <Text style={styles.redeemText}>Redeem Reward</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </>
-            ) : (
-              <>
-                <Text style={styles.modalTitle}>✨ Reward Redeemed ✨</Text>
-                <Text style={styles.modalText}>You've successfully claimed your reward! 🎁</Text>
-                <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-                  <Text style={styles.closeText}>Close</Text>
-                </TouchableOpacity>
-              </>
-            )}
+        <View className="flex-1 bg-black/90 justify-center items-center">
+          <Animated.View className="w-[85%] rounded-xl overflow-hidden shadow-lg" style={{ opacity: fadeAnim }}>  
+            <LinearGradient colors={['#00b890', '#008870']} className="py-6 px-5 items-center">
+              <Text className="text-white text-2xl font-bold mb-2">
+                {redeemed ? 'Reward Redeemed!' : ' Congratulations! '}
+              </Text>
+              <Text className="text-white text-base text-center mb-5">
+                {redeemed ? "You've successfully claimed your reward! 🌱" : "You've earned a reward!"}
+              </Text>
+              <TouchableOpacity
+                className="bg-[#131d2a] py-3 px-8 rounded-lg"
+                onPress={redeemed ? () => setModalVisible(false) : redeemReward}
+              >
+                <Text className="text-[#00b890] text-lg font-bold">
+                  {redeemed ? 'Close' : 'Redeem Reward'}
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
           </Animated.View>
         </View>
       </Modal>
     </LinearGradient>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#0a0f1a',
-  },
-  gridContainer: {
-    backgroundColor: '#131d2a',
-    borderRadius: 15,
-    padding: 10,
-  },
-  row: {
-    flexDirection: 'row',
-    marginBottom: CELL_MARGIN,
-  },
-  cell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
-    margin: CELL_MARGIN,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  investedCell: {
-    backgroundColor: '#00b890',
-  },
-  tree: {
-    fontSize: CELL_SIZE * 0.6,
-  },
-  title: {
-    color: '#00b890',
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '85%',
-    backgroundColor: '#131d2a',
-    borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#00b890',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#00b890',
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 16,
-    color: '#fff',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  redeemButton: {
-    width: '80%',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  redeemGradient: {
-    paddingVertical: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  redeemText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  closeButton: {
-    marginTop: 15,
-    backgroundColor: '#00b890',
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-  },
-  closeText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-});
