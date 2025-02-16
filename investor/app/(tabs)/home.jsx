@@ -111,7 +111,7 @@ export default function Home() {
                   <View>
                     <Text className="text-white/60 text-sm">Total Invested</Text>
                     <Text className="text-white text-xl font-bold mt-1">
-                      ${portfolioStats.totalInvested.toLocaleString()}
+                      ₹{portfolioStats.totalInvested.toLocaleString()}
                     </Text>
                   </View>
                 </View>

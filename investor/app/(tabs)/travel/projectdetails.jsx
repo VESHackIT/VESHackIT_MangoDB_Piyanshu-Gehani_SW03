@@ -161,7 +161,7 @@ const ProjectDetails = () => {
   const [project, setProject] = useState(null);
   const [progresss, setProgress] = useState(null);
   const [selectedPhase, setSelectedPhase] = useState(0);
-  const specificProjectId = "67b1171fce8bc715a288befc"; // Replace with your specific project ID
+  const specificProjectId = "67b17f1722307e215e0e56fe"; // Replace with your specific project ID
   const specificPhaseIndex = 0; // Replace with your specific phase index
   const [investModalVisible, setInvestModalVisible] = useState(false);
   const [investmentAmount, setInvestmentAmount] = useState("");
@@ -196,7 +196,7 @@ const ProjectDetails = () => {
     return string.charAt(0).toUpperCase() + string.slice(1).replace("-", " ");
   };
 
-  const handlePayment = () => {
+  const handlePayment = async() => {
     if (!investmentAmount || isNaN(investmentAmount)) {
       Alert.alert("Invalid Amount", "Please enter a valid investment amount");
       return;
@@ -230,6 +230,41 @@ const ProjectDetails = () => {
       });
     setInvestModalVisible(false);
     setInvestmentAmount("");
+    if (!project || !project.name || !project.investors || project.investors.length === 0) {
+      Alert.alert('Error', 'Project details are missing or no investors found');
+      return;
+    }
+  
+    try {
+      // Step 2: Send funding request
+      const fundResponse = await fetch("http://localhost:5002/project/fund", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          projName: project.name,
+  
+          fundAmt: parseFloat(investmentAmount)
+        })
+      });
+  
+      const fundData = await fundResponse.json();
+  
+      if (!fundResponse.ok) {
+        throw new Error(fundData.error || "Funding failed");
+      }
+  
+      console.log("Funding successful:", fundData);
+      Alert.alert("Success, Investment of ₹${investmentAmount} successful!");
+  
+      // Reset modal and input
+      setInvestModalVisible(false);
+      setInvestmentAmount('');
+    } catch (error) {
+      console.error("Error in funding:", error);
+      Alert.alert("Error", error.message);
+    }
   };
 
   useEffect(() => {

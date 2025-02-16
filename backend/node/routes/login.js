@@ -11,7 +11,8 @@ const {
   createInvestor,
   getInvestor,
   createMeeting,
-  getAllProjects
+  getAllProjects,
+  getInvestorById
 } = require("../controllers/handleLogin");
 
 router.route("/project").post(createProject);
@@ -20,8 +21,10 @@ router.route("/founder").post(createFounder);
 router.route("/founder/:name").get(getFounder);
 router.route("/investor").post(createInvestor);
 router.route("/investor/:name").get(getInvestor);
+router.route("/investor/:id").get(getInvestorById);
 router.route("/meeting").post(createMeeting);
 router.route("/allprojects").get(getAllProjects);
+
 
 
 module.exports = router;
