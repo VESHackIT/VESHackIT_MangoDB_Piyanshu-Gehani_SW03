@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { ScrollView, FlatList, View, Text, TouchableOpacity, Image, SafeAreaView, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, FlatList, View, Text, TouchableOpacity, Image, SafeAreaView, Modal, TextInput, ActivityIndicator, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
 
 // Renewable energy focused dummy data
 const INVESTED_PROJECTS = [
@@ -67,6 +70,30 @@ export default function CommunitySection() {
     createdBy: ''
   });
 
+  const [newsData, setNewsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch news data from backend
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/news');
+        if (!response.ok) {
+          throw new Error('Failed to fetch news');
+        }
+        const data = await response.json();
+        setNewsData(data.data || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
   const toggleLike = (id) => {
     setCommunityDiscussions(prevDiscussions =>
       prevDiscussions.map(discussion => {
@@ -131,7 +158,6 @@ export default function CommunitySection() {
     </TouchableOpacity>
   );
 
-
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: '#0a0f1a' }}>
       <ScrollView className='mt-10'>
@@ -159,6 +185,65 @@ export default function CommunitySection() {
           </ScrollView>
         </View>
 
+        {/* News Section */}
+        {/* News Section */}
+<View className="py-6">
+  <Text className="text-2xl px-5 mb-4 text-white font-semibold">Latest Renewable Energy News</Text>
+  {loading ? (
+    <ActivityIndicator size="large" color="#00b890" />
+  ) : error ? (
+    <Text className="text-red-500 px-5">{error}</Text>
+  ) : (
+    <ScrollView 
+      horizontal 
+      showsHorizontalScrollIndicator={false} 
+      className="pl-5"
+      contentContainerStyle={{ paddingRight: 20 }}
+    >
+      {newsData.map((news, index) => (
+        <TouchableOpacity
+          key={index}
+          className="rounded-xl mr-4 overflow-hidden"
+          style={{ 
+            width: width * 0.85,
+            backgroundColor: '#172233',
+            borderLeftWidth: 4,
+            borderLeftColor: '#00b890'
+          }}
+          activeOpacity={0.9}
+        >
+          <View className="p-5 h-40 justify-between">
+            <View>
+              <Text 
+                className="text-white text-lg font-bold mb-2" 
+                numberOfLines={2}
+                style={{ lineHeight: 24 }}
+              >
+                {news.title}
+              </Text>
+              <Text className="text-[#00b890] text-sm font-medium">
+                {news.source}
+              </Text>
+            </View>
+            
+            <View className="flex-row justify-between items-center">
+              <Text className="text-gray-400 text-xs">
+                {news.timestamp}
+              </Text>
+              <MaterialIcons 
+                name="arrow-forward" 
+                size={20} 
+                color="#00b890" 
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  )}
+</View>
+
+        {/* Community Discussions Section */}
         <View className="px-5 py-6">
           <Text className="text-2xl mb-5 text-white font-semibold">Community Discussions</Text>
           {communityDiscussions.map((discussion) => (

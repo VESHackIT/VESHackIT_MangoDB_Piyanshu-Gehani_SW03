@@ -22,6 +22,11 @@ const projectSchema = new mongoose.Schema(
             status: { type: String, enum: ["pending", "in-progress", "completed"], default: "pending" },
           },
         ],
+        reportUri: { type: String },
+        meetUri: { type: String },
+        meetLikes: { type: Number, default: 0 },
+        meetDislikes: { type: Number, default: 0 },
+        satisfaction: { type: Number, default: 0 }
       },
     ], // Added project progress with phases and tasks
   },
