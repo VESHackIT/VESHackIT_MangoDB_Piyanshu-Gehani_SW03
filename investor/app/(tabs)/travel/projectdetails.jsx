@@ -257,25 +257,44 @@ const ProjectDetails = () => {
     }
   }, [name]);
 
-  const handleDislike = () => {
-    // Update the dislikes count
-    const updatedProgresss = [...progresss];
-    updatedProgresss[selectedPhase].meetDislikes += 1;
-    setProgress(updatedProgresss);
+  const handleDislike = async () => {
+    try {
+      // Update the dislikes count
+      const updatedProgresss = [...progresss];
+      updatedProgresss[selectedPhase].meetDislikes += 1;
+      setProgress(updatedProgresss);
 
-    // Calculate the new satisfaction score
-    const newLikes = updatedProgresss[selectedPhase].meetLikes;
-    const newDislikes = updatedProgresss[selectedPhase].meetDislikes;
-    const newScore = calculateSatisfactionScore(newLikes, newDislikes);
+      // Calculate the new satisfaction score
+      const newLikes = updatedProgresss[selectedPhase].meetLikes;
+      const newDislikes = updatedProgresss[selectedPhase].meetDislikes;
+      const newScore = calculateSatisfactionScore(newLikes, newDislikes);
 
-    // Show an alert if the score is low
-    if (newScore < 50) {
-      Alert.alert(
-        "Low Satisfaction Score",
-        `The satisfaction score is now ${newScore.toFixed(
-          1
-        )}%, which is considered low.`
-      );
+      // Show an alert if the score is low
+      if (newScore < 50) {
+        Alert.alert(
+          "Low Satisfaction Score",
+          `The satisfaction score is now ${newScore.toFixed(1)}%, which is considered low.`
+        );
+  
+        // Call the refund API
+        const response = await fetch(`http://localhost:5002/refund/${project.name}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        const result = await response.json();
+  
+        if (response.ok) {
+          Alert.alert("Refund Successful", result.message);
+        } else {
+          Alert.alert("Refund Failed", result.message);
+        }
+      }
+    } catch (error) {
+      console.error("Error processing refund:", error);
+      Alert.alert("Error", "Failed to process refund. Please try again.");
     }
   };
 
