@@ -10,12 +10,15 @@ import Icon from "react-native-vector-icons/Feather";
 import React, { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from 'react-native-feather';
 import { Video } from 'react-native-feather';
+import { ThumbsUp, ThumbsDown } from 'react-native-feather'; 
+
 const impactIcons = {
   carbonReduction: { icon: "cloud", color: "#4CAF50" }, // Green
   householdsBenefited: { icon: "home", color: "#3F51B5" }, // Blue
   roi: { icon: "chart-line", color: "#FF9800" }, // Orange
   longTermSustainability: { icon: "sync-alt", color: "#9C27B0" }, // Purple
 };
+
 const theme = {
   background: "#0a0f1a", // Darker background
   surface: "#131d2a", // Darker card surface
@@ -24,6 +27,7 @@ const theme = {
   inactive: "#7a8ca2", // Slightly muted inactive color
   shadow: "#000",
 };
+
 const contact = {
   email: "example@example.com",
   linkedin: "https://www.linkedin.com/company/solar-energy-projects-zw",
@@ -74,6 +78,7 @@ const dummyProjects = {
     },
   },
 };
+
 const openSocialLink = async (url) => {
   const supported = await Linking.canOpenURL(url);
   if (supported) {
@@ -138,6 +143,11 @@ const ProjectDetails = () => {
   const [project, setProject] = useState(null);
   const [progresss, setProgress] = useState(null);
   const [selectedPhase, setSelectedPhase] = useState(0);
+  const specificProjectId = "67b1171fce8bc715a288befc"; // Replace with your specific project ID
+  const specificPhaseIndex = 0; // Replace with your specific phase index
+
+  // Check if the current project and phase match the specific ones
+  const showDislikeButton = project?._id === specificProjectId && selectedPhase === specificPhaseIndex;
   
   const statusColors = {
     'completed': '#00b890',
@@ -188,7 +198,25 @@ const ProjectDetails = () => {
     }
   }, [name]);
   
-
+  const handleDislike = () => {
+    // Update the dislikes count
+    const updatedProgresss = [...progresss];
+    updatedProgresss[selectedPhase].meetDislikes += 1;
+    setProgress(updatedProgresss);
+  
+    // Calculate the new satisfaction score
+    const newLikes = updatedProgresss[selectedPhase].meetLikes;
+    const newDislikes = updatedProgresss[selectedPhase].meetDislikes;
+    const newScore = calculateSatisfactionScore(newLikes, newDislikes);
+  
+    // Show an alert if the score is low
+    if (newScore < 50) {
+      Alert.alert(
+        "Low Satisfaction Score",
+        `The satisfaction score is now ${newScore.toFixed(1)}%, which is considered low.`
+      );
+    }
+  };
 
   if (!project) {
     return (
@@ -214,9 +242,6 @@ const renderProgressBar = (progress) => {
     );
   };
   
-  const isPhaseExpanded = (phaseIndex) => {
-    return expandedPhases.includes(phaseIndex);
-  };
   return (
     <ScrollView style={{ backgroundColor: theme.background }} className="flex-1">
 
@@ -246,57 +271,56 @@ const renderProgressBar = (progress) => {
       <View className="p-5 space-y-6">
         {/* Trust Score and Funding Progress */}
         <View style={styles.fundingSection}>
-                        <View style={styles.fundingHeader}>
-                          <Text style={[styles.raisedAmount, { color: "#ffffff" }]}>
-                            ₹{project.raisedAmount.toLocaleString()}
-                          </Text>
-                          <Text
-                            style={[styles.targetAmount, { color: theme.inactive }]}
-                          >
-                            / ₹{project.fundingGoal.toLocaleString()}
-                          </Text>
-                        </View>
+          <View style={styles.fundingHeader}>
+            <Text style={[styles.raisedAmount, { color: "#ffffff" }]}>
+              ₹{project.raisedAmount.toLocaleString()}
+            </Text>
+            <Text
+              style={[styles.targetAmount, { color: theme.inactive }]}
+            >
+              / ₹{project.fundingGoal.toLocaleString()}
+            </Text>
+          </View>
         
-                        {renderProgressBar(progress)}
+          {renderProgressBar(progress)}
         
-                        <View style={styles.fundingFooter}>
-                          <View style={styles.timeRemaining}>
-                            <Icon name="clock" size={12} color={theme.inactive} />
-                            <Text style={[styles.daysLeft, { color: theme.inactive }]}>
-                              15 days left
-                            </Text>
-                          </View>
+          <View style={styles.fundingFooter}>
+            <View style={styles.timeRemaining}>
+              <Icon name="clock" size={12} color={theme.inactive} />
+                <Text style={[styles.daysLeft, { color: theme.inactive }]}>
+                  15 days left
+                </Text>
+            </View>
         
-                          <View style={styles.investors}>
-                            <View style={styles.avatarStack}>
-                              {[0, 1, 2].map((index) => (
-                                <View
-                                  key={index}
-                                  style={[
-                                    styles.avatarWrapper,
-                                    {
-                                      right: index * 12,
-                                      backgroundColor: theme.surface,
-                                    },
-                                  ]}
-                                >
-                                  <Image
-                                    source={{
-                                      uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmI57giWxjA-WXBTE7HIzLV0Y9YcEnxIyrCQ&s",
-                                    }}
-                                    style={styles.avatar}
-                                  />
-                                </View>
-                              ))}
-                            </View>
-                            <Text
-                              style={[styles.investorCount, { color: theme.inactive }]}
-                            >
-                              +220 others
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
+            <View style={styles.investors}>
+              <View style={styles.avatarStack}>
+                {[0, 1, 2].map((index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.avatarWrapper,
+                      {
+                        right: index * 12,
+                        backgroundColor: theme.surface,
+                      },
+                      ]}>
+                    <Image
+                      source={{
+                        uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmI57giWxjA-WXBTE7HIzLV0Y9YcEnxIyrCQ&s",
+                      }}
+                      style={styles.avatar}
+                    />
+                  </View>
+                ))}
+              </View>
+              <Text
+                style={[styles.investorCount, { color: theme.inactive }]}
+              >
+                +220 others
+              </Text>
+            </View>
+          </View>
+        </View>
         <TouchableOpacity
           style={[
             styles.detailsButton,
@@ -391,7 +415,24 @@ const renderProgressBar = (progress) => {
             </View>
           ))}
         </ScrollView>
-        
+        <View className="flex-row justify-end mt-4 space-x-4">
+        {/* Like Icon (Non-clickable) */}
+        {showDislikeButton && (<View className="flex-row items-center">
+          <ThumbsUp stroke="#00b890" width={24} height={24} />
+          
+        </View>)}
+
+        {/* Dislike Icon (Clickable) */}
+        {showDislikeButton && (
+          <TouchableOpacity
+            className="flex-row items-center"
+            onPress={handleDislike}
+          >
+            <ThumbsDown stroke="#ff4444" width={24} height={24} />
+            
+          </TouchableOpacity>
+        )}
+      </View>
       </View>
       <MeetingSummaryCard
         likes={progresss[selectedPhase].meetLikes}
