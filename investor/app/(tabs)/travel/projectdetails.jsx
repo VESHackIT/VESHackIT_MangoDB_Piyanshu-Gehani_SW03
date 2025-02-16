@@ -183,6 +183,7 @@ const ProjectDetails = () => {
   
         if (response.ok && data.project) {
           setProject(data.project); // ✅ Set project using nested object
+          console.log(data.project);
           setProgress(data.project.progress)
         } else {
           console.error("Project not found:", data);
