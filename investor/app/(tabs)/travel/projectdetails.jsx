@@ -484,16 +484,26 @@ const ProjectDetails = () => {
               <Text className="text-white font-bold">Status</Text>
             </View>
             <ScrollView>
-              {progresss[selectedPhase].tasks.map((task, taskIndex) => (
+            {progresss[selectedPhase].tasks.map((task, taskIndex) => (
                 <View
                   key={taskIndex}
                   className="flex-row justify-between items-center p-4 border-b border-[#2d3a4b]"
                 >
-                  <Text className="text-white">{task.title}</Text>
+                  <Text 
+                    className="text-white flex-1 mr-2" 
+                    numberOfLines={1} 
+                    ellipsizeMode="tail" // Truncate with an ellipsis
+                  >
+                    {task.title}
+                  </Text>
+
+                  {/* Task Status */}
                   <View
                     className="px-2.5 py-1 rounded-full"
                     style={{
                       backgroundColor: `${statusColors[task.status]}20`,
+                      minWidth: 80, // Fixed width for status
+                      alignItems: 'center', // Center text horizontally
                     }}
                   >
                     <Text

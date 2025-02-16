@@ -3,6 +3,8 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
+import { useEffect } from "react";
+import { StatusBar as RNStatusBar } from "react-native";
 
 export default function Layout() {
   // Define our theme colors in one place for easy updating
@@ -165,3 +167,6 @@ export default function Layout() {
     </>
   );
 }
+useEffect(() => {
+  RNStatusBar.setBackgroundColor("#0a0f1a");
+}, []);

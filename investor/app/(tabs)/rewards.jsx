@@ -11,11 +11,11 @@ const investments = [0, 1, 2];
 
 // Sample leaderboard data
 const leaderboardData = [
-  { name: "Sarah Miller", carbonSaved: 2450 },
-  { name: "John Davis", carbonSaved: 1890 },
-  { name: "Emma Wilson", carbonSaved: 1670 },
-  { name: "Michael Chen", carbonSaved: 1450 },
-  { name: "Lisa Thompson", carbonSaved: 1230 }
+  { name: "Sarah Miller", carbonSaved: 245 },
+  { name: "John Davis", carbonSaved: 189 },
+  { name: "You", carbonSaved: 167 },
+  { name: "Michael Chen", carbonSaved: 145 },
+  { name: "Lisa Thompson", carbonSaved: 123 }
 ];
 
 export default function InvestmentGrid() {
@@ -86,7 +86,7 @@ export default function InvestmentGrid() {
   return (
     <LinearGradient colors={['#0a0f1a', '#131d2a']} className="flex-1 p-5">
       <ScrollView className="mb-5 mt-10">
-        <Text className="text-white text-2xl font-pbold mb-4">Carbon Savings Leaderboard</Text>
+        <Text className="text-white text-xl font-psemibold mb-4">CO2 Savings Leaderboard</Text>
         {leaderboardData.map((item, index) => renderLeaderboardItem(item, index))}
   
 
