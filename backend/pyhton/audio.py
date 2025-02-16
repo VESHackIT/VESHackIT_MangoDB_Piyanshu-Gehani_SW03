@@ -97,10 +97,10 @@ def analyze():
         "suggestions": suggestion
     })
 
-def get_reference_pdf_path():
+def get_reference_pdf_path(filename):
     """Returns the absolute path of the reference PDF stored in the same directory."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(script_dir, "reference.pdf")
+    return os.path.join(script_dir, filename)
 
 def extract_text_from_pdf(pdf_path):
     """Extracts and formats text from a given PDF file."""
@@ -115,8 +115,8 @@ def extract_text_from_pdf(pdf_path):
 
 def verify_project(uploaded_pdf):
     """Compares uploaded PDF with reference PDF and sends to Gemini for verification."""
-    reference_pdf_path = get_reference_pdf_path()
-    
+    reference_pdf_path = get_reference_pdf_path("reference.pdf")
+    print("Path",reference_pdf_path)
     if not os.path.exists(reference_pdf_path):
         return "REFERENCE PDF NOT FOUND"
     
@@ -159,5 +159,53 @@ def verify():
     os.remove(pdf_path)
     
     return jsonify({"verification_result": result})
+
+def validate_statement(uploaded_pdf):
+    """Compares uploaded financial statement with reference PDF and validates authenticity."""
+    reference_pdf_path = get_reference_pdf_path("reference-statement.pdf")
+    
+    if not os.path.exists(reference_pdf_path):
+        return "REFERENCE PDF NOT FOUND"
+    
+    reference_text = extract_text_from_pdf(reference_pdf_path)
+    uploaded_text = extract_text_from_pdf(uploaded_pdf)
+
+    if reference_text == uploaded_text:
+        return "AUTHENTIC"
+
+    prompt = f"""
+    Compare the following financial statements and determine if the uploaded document is authentic.
+
+    **Reference Statement (Correct)**:
+    {reference_text}
+
+    **Uploaded Statement**:
+    {uploaded_text}
+
+    Analyze the document based on consistency, financial accuracy, formatting, and compliance with standard financial practices. Provide a final verdict as 'AUTHENTIC' or 'NOT AUTHENTIC' without any extra text.
+    """
+    
+    response = ollama.generate(model="llama3.2:3b", prompt=prompt)
+
+    return response["response"].strip()
+
+@app.route("/validate-statement", methods=["POST"])
+def validate():
+    print("Validating financial statement", request.files)
+    
+    file_key = next((key for key in request.files.keys() if key.lower() == "file"), None)
+    
+    if not file_key:
+        return jsonify({"error": "No file provided", "received_keys": list(request.files.keys())}), 400
+
+    file = request.files[file_key]
+    pdf_path = "uploaded_statement.pdf"
+    file.save(pdf_path)
+    
+    result = validate_statement(pdf_path)
+    os.remove(pdf_path)
+    
+    return jsonify({"validation_result": result})
+
 if __name__ == "__main__":
     app.run(debug=True, port=5005)

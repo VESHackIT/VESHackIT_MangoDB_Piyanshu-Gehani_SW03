@@ -1,23 +1,4 @@
-/*!
-
-=========================================================
-* Vision UI Free Chakra - v1.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/vision-ui-free-chakra
-* Copyright 2021 Creative Tim (https://www.creative-tim.com/)
-* Licensed under MIT (https://github.com/creativetimofficial/vision-ui-free-chakra/blob/master LICENSE.md)
-
-* Design and Coded by Simmmple & Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
-import React from "react";
-// Chakra imports
+import React, { useState } from "react";
 import {
   Box,
   Flex,
@@ -26,198 +7,425 @@ import {
   FormLabel,
   Heading,
   Input,
-  Link,
-  Switch,
   Text,
   DarkMode,
+  Stack,
+  Progress,
+  Icon,
+  useToast,
+  Spinner
 } from "@chakra-ui/react";
 
-// Assets
-import signInImage from "assets/img/signInImage.png";
+import { CheckCircle, Upload } from "lucide-react";
 
-// Custom Components
-import AuthFooter from "components/Footer/AuthFooter";
+// Assets
+import signInImage from "assets/sign.jpg";
 import GradientBorder from "components/GradientBorder/GradientBorder";
+import AuthFooter from "components/Footer/AuthFooter";
 
 function SignIn() {
+ 
+  const [selectedType, setSelectedType] = useState(null);
+  const [step, setStep] = useState(1);
+  const [bankStatement, setBankStatement] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const toast = useToast();
+  
+  
   const titleColor = "white";
-  const textColor = "gray.400";
+  const textColor = "white";
+  const bgColor = "black";
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setBankStatement(file);
+      toast({
+        title: "File uploaded",
+        description: "Bank statement uploaded successfully. Verification pending.",
+        status: "success",
+        duration: 3000,
+      });
+    }
+  };
+
+  const handleVerification = async () => {
+    if (!bankStatement) {
+      toast({
+        title: "Error",
+        description: "Please upload a bank statement before verifying.",
+        status: "error",
+        duration: 3000,
+      });
+      return;
+    }
+  
+    setIsVerifying(true);
+  
+    const formData = new FormData();
+    formData.append("file", bankStatement);
+  
+    try {
+      const response = await fetch("http://127.0.0.1:5005/validate-statement", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const result = await response.json();
+      const verdict = result.validation_result.includes("NOT AUTHENTIC")
+        ? "NOT LEGITIMATE"
+        : "LEGITIMATE";
+      
+        console.log(result, verdict);
+  
+      if (verdict === "LEGITIMATE") {
+        setIsVerified(true);
+        toast({
+          title: "Verification Complete",
+          description: "Bank statement has been verified successfully.",
+          status: "success",
+          duration: 3000,
+        });
+  
+        setTimeout(() => {
+          window.location.href = "/#admin/dashboard";
+        }, 1000);
+      } else {
+        throw new Error("Verification failed. The statement is NOT LEGITIMATE.");
+      }
+    } catch (error) {
+      toast({
+        title: "Verification Failed",
+        description: error.message || "An error occurred while verifying.",
+        status: "error",
+        duration: 3000,
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+  
+  
+  const renderFormStep = () => {
+    switch(step) {
+      case 1:
+        return (
+          <Stack spacing={6}>
+            <Box>
+              <Heading color={titleColor} fontSize="32px" mb={4}>
+                Personal Details
+              </Heading>
+              <Text color={textColor} fontSize="16px">
+                Let's start with your basic information
+              </Text>
+            </Box>
+            
+            <FormControl>
+              <FormLabel color="white" mb={2}>Full Name</FormLabel>
+              <GradientBorder borderRadius="20px">
+                <Input
+                  color="white"
+                  bg={bgColor}
+                  border="transparent"
+                  borderRadius="20px"
+                  placeholder="Enter your name"
+                  h="50px"
+                />
+              </GradientBorder>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel color="white" mb={3}>Email</FormLabel>
+              <GradientBorder borderRadius="20px">
+                <Input
+                  color="white"
+                  bg={bgColor}
+                  border="transparent"
+                  borderRadius="20px"
+                  placeholder="Enter your email"
+                  h="50px"
+                />
+              </GradientBorder>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel color="white" mb={3}>Phone</FormLabel>
+              <GradientBorder borderRadius="20px">
+                <Input
+                  color="white"
+                  bg={bgColor}
+                  border="transparent"
+                  borderRadius="20px"
+                  placeholder="Enter your phone"
+                  h="50px"
+                />
+              </GradientBorder>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel color="white" mb={3}>LinkedIn URL</FormLabel>
+              <GradientBorder borderRadius="20px">
+                <Input
+                  color="white"
+                  bg={bgColor}
+                  border="transparent"
+                  borderRadius="20px"
+                  placeholder="Your LinkedIn profile URL"
+                  h="50px"
+                />
+              </GradientBorder>
+            </FormControl>
+          </Stack>
+        );
+      
+      case 2:
+        return (
+          <Stack spacing={6}>
+            <Box>
+              <Heading color={titleColor} fontSize="32px" mb={4}>
+                Project Overview
+              </Heading>
+              <Text color={textColor} fontSize="16px">
+                Describe your renewable energy project
+              </Text>
+            </Box>
+
+            <FormControl>
+              <FormLabel color="white" mb={3}>Project Title</FormLabel>
+              <GradientBorder borderRadius="20px">
+                <Input
+                  color="white"
+                  bg={bgColor}
+                  border="transparent"
+                  borderRadius="20px"
+                  placeholder="Enter project title"
+                  h="50px"
+                />
+              </GradientBorder>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel color="white" mb={3}>Project Description</FormLabel>
+              <GradientBorder borderRadius="20px">
+                <Input
+                  as="textarea"
+                  color="white"
+                  bg={bgColor}
+                  border="transparent"
+                  borderRadius="20px"
+                  placeholder="Describe your project"
+                  minH="120px"
+                  p={4}
+                />
+              </GradientBorder>
+            </FormControl>
+
+            <FormControl>
+  <FormLabel color="white" mb={3} fontSize="xl" fontWeight="bold">
+    Choose Your Power, Shape the Future ⚡️
+  </FormLabel>
+  <Stack spacing={4} color="white">
+    {["☀️ Solar", "🌬️ Wind", "💧 Hydro", "🌿 Biomass", "🌍 Geothermal"].map((type) => (
+      <Button
+      key={type}
+      onClick={() => setSelectedType(type)}
+      w="100%"
+      h="50px"
+      fontSize="md"
+      fontWeight="semibold"
+      color={selectedType === type ? "black" : "white"}
+      bg={selectedType === type ? "brand.500" : "transparent"}
+      borderColor="white"
+      _hover={{
+        bg: selectedType === type ? "brand.600" : "gray.700",
+        transform: "scale(1.05)",
+      }}
+      transition="all 0.2s ease-in-out"
+    >
+      {type}
+    </Button>
+    ))}
+  </Stack>
+</FormControl>
+
+          </Stack>
+        );
+
+      case 3:
+        return (
+          <Stack spacing={6}>
+            <Box>
+              <Heading color={titleColor} fontSize="32px" mb={4}>
+                Bank Verification
+              </Heading>
+              <Text color={textColor} fontSize="16px">
+                Please upload your bank statement for verification
+              </Text>
+            </Box>
+
+            <FormControl bg="black">
+              <FormLabel color="white" mb={3}>Bank Statement</FormLabel>
+              <GradientBorder borderRadius="20px" bg="black" border="white">
+                <Flex
+                  direction="column"
+                  align="center"
+                  justify="center"
+                  // bg="black"
+                  borderRadius="20px"
+                  // p={24}
+                  cursor="pointer"
+                  onClick={() => document.getElementById('fileInput').click()}
+                  // minH="200px"
+                >
+                  <Input
+                    id="fileInput"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    display="none"
+                    onChange={handleFileUpload}
+                    bg="black"
+                  />
+                  {isVerified ? (
+                    <>
+                      <Icon as={CheckCircle} w={12} h={12} color="green.300" mb={4} />
+                      <Text color="white" fontSize="16px">
+                        {bankStatement.name}
+                      </Text>
+                      <Text color="green.300" fontSize="16px" mt={2}>
+                        Verified Successfully
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Icon as={Upload} w={12} h={12} color="white" mb={4} />
+                      <Text color="white" fontSize="16px">
+                        {bankStatement ? bankStatement.name : "Click to upload bank statement"}
+                      </Text>
+                    </>
+                  )}
+                </Flex>
+              </GradientBorder>
+            </FormControl>
+
+            {bankStatement && !isVerified && (
+              <Flex 
+                align="center" 
+                cursor="pointer" 
+                onClick={handleVerification}
+                color="green.300"
+                fontSize="16px"
+              >
+                {isVerifying ? (
+                  <>
+                    <Spinner size="sm" mr={2} />
+                    <Text>Please hold on for a moment, we are verifying...</Text>
+                  </>
+                ) : (
+                  <Text>
+                    File uploaded successfully. Pending verification. Click to verify
+                  </Text>
+                )}
+              </Flex>
+            )}
+          </Stack>
+        );
+    }
+  };
 
   return (
-    <Flex position='relative'>
+    <Flex position="relative">
       <Flex
-        minH='100vh'
-        h={{ base: "120vh", lg: "fit-content" }}
-        w='100%'
-        maxW='1044px'
-        mx='auto'
+        minH="100vh"
+        w="100%"
+        maxW="1044px"
+        mx="auto"
         pt={{ sm: "100px", md: "0px" }}
-        flexDirection='column'
-        me={{ base: "auto", lg: "50px", xl: "auto" }}>
+        flexDirection="column"
+        me={{ base: "auto", lg: "50px", xl: "auto" }}
+      >
         <Flex
-          alignItems='center'
-          justifyContent='start'
+          alignItems="center"
+          justifyContent="start"
           style={{ userSelect: "none" }}
           mx={{ base: "auto", lg: "unset" }}
           ms={{ base: "auto", lg: "auto" }}
           w={{ base: "100%", md: "50%", lg: "450px" }}
-          px='50px'>
+          px="50px"
+        >
           <Flex
-            direction='column'
-            w='100%'
-            background='transparent'
+            direction="column"
+            w="100%"
+            background="transparent"
             mt={{ base: "50px", md: "150px", lg: "160px", xl: "245px" }}
-            mb={{ base: "60px", lg: "95px" }}>
-            <Heading color={titleColor} fontSize='32px' mb='10px'>
-              Nice to see you!
-            </Heading>
-            <Text
-              mb='36px'
-              ms='4px'
-              color={textColor}
-              fontWeight='bold'
-              fontSize='14px'>
-              Enter your email and password to sign in
-            </Text>
-            <FormControl>
-              <FormLabel
-                ms='4px'
-                fontSize='sm'
-                fontWeight='normal'
-                color='white'>
-                Email
-              </FormLabel>
-              <GradientBorder
-                mb='24px'
-                w={{ base: "100%", lg: "fit-content" }}
-                borderRadius='20px'>
-                <Input
-                  color='white'
-                  bg='rgb(19,21,54)'
-                  border='transparent'
-                  borderRadius='20px'
-                  fontSize='sm'
-                  size='lg'
-                  w={{ base: "100%", md: "346px" }}
-                  maxW='100%'
-                  h='46px'
-                  placeholder='Your email adress'
-                />
-              </GradientBorder>
-            </FormControl>
-            <FormControl>
-              <FormLabel
-                ms='4px'
-                fontSize='sm'
-                fontWeight='normal'
-                color='white'>
-                Password
-              </FormLabel>
-              <GradientBorder
-                mb='24px'
-                w={{ base: "100%", lg: "fit-content" }}
-                borderRadius='20px'>
-                <Input
-                  color='white'
-                  bg='rgb(19,21,54)'
-                  border='transparent'
-                  borderRadius='20px'
-                  fontSize='sm'
-                  size='lg'
-                  w={{ base: "100%", md: "346px" }}
-                  maxW='100%'
-                  type='password'
-                  placeholder='Your password'
-                />
-              </GradientBorder>
-            </FormControl>
-            <FormControl display='flex' alignItems='center'>
-              <DarkMode>
-                <Switch id='remember-login' colorScheme='brand' me='10px' />
-              </DarkMode>
-              <FormLabel
-                htmlFor='remember-login'
-                mb='0'
-                ms='1'
-                fontWeight='normal'
-                color='white'>
-                Remember me
-              </FormLabel>
-            </FormControl>
-            <Button
-              variant='brand'
-              fontSize='10px'
-              type='submit'
-              w='100%'
-              maxW='350px'
-              h='45'
-              mb='20px'
-              mt='20px'>
-              SIGN IN
-            </Button>
+            mb={{ base: "60px", lg: "95px" }}
+          >
+            <Progress 
+              value={(step / 3) * 100} 
+              mb={8} 
+              colorScheme="green" 
+              h="8px" 
+              borderRadius="full" 
+            />
+            
+            {renderFormStep()}
 
-            <Flex
-              flexDirection='column'
-              justifyContent='center'
-              alignItems='center'
-              maxW='100%'
-              mt='0px'>
-              <Text color={textColor} fontWeight='medium'>
-                Don't have an account?
-                <Link color={titleColor} as='span' ms='5px' fontWeight='bold'>
-                  Sign Up
-                </Link>
-              </Text>
+            <Flex justify="space-between" mt={8}>
+              {step > 1 && (
+                <Button
+                  variant="outline"
+                  color="white"
+                  h="50px"
+                  px={8}
+                  onClick={() => setStep(step - 1)}
+                  borderColor="white"
+                >
+                  Previous
+                </Button>
+              )}
+              <Button
+                variant="brand"
+                ml="auto"
+                h="50px"
+                px={8}
+                onClick={() => {
+                  if (step === 3 && !bankStatement) {
+                    toast({
+                      title: "Bank statement required",
+                      description: "Please upload your bank statement to proceed",
+                      status: "error",
+                      duration: 3000,
+                    });
+                    return;
+                  }
+                  if (step < 3) setStep(step + 1);
+                }}
+              >
+                {step === 3 ? "Submit" : "Next"}
+              </Button>
             </Flex>
           </Flex>
         </Flex>
-        <Box
-          w={{ base: "335px", md: "450px" }}
-          mx={{ base: "auto", lg: "unset" }}
-          ms={{ base: "auto", lg: "auto" }}
-          mb='80px'>
-          <AuthFooter />
-        </Box>
+
         <Box
           display={{ base: "none", lg: "block" }}
-          overflowX='hidden'
-          h='100%'
+          overflowX="hidden"
+          h="100%"
           maxW={{ md: "50vw", lg: "50vw" }}
-          minH='100vh'
-          w='960px'
-          position='absolute'
-          left='0px'>
+          minH="100vh"
+          w="960px"
+          position="absolute"
+          left="0px"
+          bg={bgColor}
+        >
           <Box
             bgImage={signInImage}
-            w='100%'
-            h='100%'
-            bgSize='cover'
-            bgPosition='50%'
-            position='absolute'
-            display='flex'
-            flexDirection='column'
-            justifyContent='center'
-            alignItems='center'
-            position='absolute'>
-            <Text
-              textAlign='center'
-              color='white'
-              letterSpacing='8px'
-              fontSize='20px'
-              fontWeight='500'>
-              INSPIRED BY THE FUTURE:
-            </Text>
-            <Text
-              textAlign='center'
-              color='transparent'
-              letterSpacing='8px'
-              fontSize='36px'
-              fontWeight='bold'
-              bgClip='text !important'
-              bg='linear-gradient(94.56deg, #FFFFFF 79.99%, #21242F 102.65%)'>
-              THE VISION UI DASHBOARD
-            </Text>
-          </Box>
+            w="100%"
+            h="100%"
+            bgSize="cover"
+            bgPosition="50%"
+            position="absolute"
+          />
         </Box>
       </Flex>
     </Flex>
