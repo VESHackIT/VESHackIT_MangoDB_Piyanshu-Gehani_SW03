@@ -70,7 +70,7 @@ const ProjectList = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch("http://192.168.39.152:5001/login/allprojects");
+        const response = await fetch("http://192.168.39.152:5002/login/allprojects");
         if (!response.ok) {
           throw new Error("Failed to fetch projects");
         }
