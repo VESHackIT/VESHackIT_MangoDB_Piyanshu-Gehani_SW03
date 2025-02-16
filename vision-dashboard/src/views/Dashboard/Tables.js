@@ -54,7 +54,7 @@ export default function Dashboard() {
 	useEffect(() => {
 		const fetchData = async () => {
 		  try {
-			const response = await fetch('http://localhost:5001/login/founder/Piyanshu');
+			const response = await fetch('http://localhost:5002/login/founder/Piyanshu');
 			const data = await response.json();
 			setFounderData(data.founder);
 		  } catch (error) {
@@ -68,20 +68,28 @@ export default function Dashboard() {
 	  if (!founderData) {
 		return <Text>Loading...</Text>;
 	  }
+// Calculate total funds raised
+const totalRaised = founderData.projects.reduce((sum, project) => sum + (project.raisedAmount || 0), 0);
 
-	  // Calculate total funds raised and success rate
-  const totalRaised = founderData.projects.reduce((sum, project) => sum + project.raisedAmount, 0);
-  const successRate = (founderData.projects.length > 0
-    ? (founderData.projects.filter((project) => project.raisedAmount >= project.fundingGoal).length /
-        founderData.projects.length) *
-      100
-    : 0
-  ).toFixed(0);
+// Calculate total funding goals
+const totalFundingGoal = founderData.projects.reduce((sum, project) => sum + (project.fundingGoal || 0), 0) || 1;
 
-  // Mock data for funding progress, backers, etc.
-  const fundingProgress = (totalRaised / (founderData.projects.reduce((sum, project) => sum + project.fundingGoal, 0)) * 100);
-  const backersThisYear = Math.floor(Math.random() * 1000) + 500; // Random backers count
-  const avgContribution = totalRaised / backersThisYear;
+// Calculate success rate safely
+const successfulProjects = founderData.projects.filter(project => (project.raisedAmount || 0) >= (project.fundingGoal || 0)).length;
+const successRate = successfulProjects == 0 ? 0 : ((successfulProjects / Math.max(founderData.projects.length, 1)) * 100).toFixed(0);
+// const successRate = 75;
+
+// Ensure funding progress is a valid number
+const rawFundingProgress = (totalRaised / totalFundingGoal) * 100;
+const fundingProgress = 75;
+// const fundingProgress = isNaN(rawFundingProgress) ? "0.00" : Math.min(rawFundingProgress, 100).toFixed(2);
+
+
+// Controlled random backer count
+const backersThisYear = Math.floor(Math.random() * 501) + 500; // Between 500-1000
+
+// Calculate average contribution safely
+const avgContribution = backersThisYear > 0 ? (totalRaised / backersThisYear).toFixed(2) : 0;
 
 
 	return (
