@@ -1,0 +1,62 @@
+Industry,Product,CO₂ Emissions (per unit)
+Renewable Energy (Solar Panels),1m² Solar PV panel,20-70 kg CO₂/m²
+Renewable Energy (Wind Turbines),1 MW wind turbine,5-15 g CO₂/kWh
+Electric Vehicles (EVs),1 EV car,40-80 kg CO₂/kWh (battery production)
+Electric Vehicles (EVs),1 EV car (lifecycle emissions),10-50 g CO₂/km
+Green Hydrogen Production,1 kg of green hydrogen,0-5 kg CO₂
+Sustainable Agriculture (Lab-Grown Meat),1 kg of lab-grown beef,5-25 kg CO₂
+Sustainable Agriculture (Plant-Based Meat),1 kg of plant-based meat,2-5 kg CO₂
+Recycled Materials (Aluminum),1 kg of recycled aluminum,0.5-1.5 kg CO₂
+Sustainable Construction (Mass Timber),1m³ of mass timber,-500 to 50 kg CO₂
+Energy Storage (Lithium-Ion Batteries),1 kWh lithium-ion battery,50-100 kg CO₂/kWh
+Industry,Product,CO₂ Emissions (per unit)
+Renewable Energy (Solar Panels),1m² Solar PV panel,20-70 kg CO₂/m²
+Renewable Energy (Wind Turbines),1 MW wind turbine,5-15 g CO₂/kWh
+Electric Vehicles (EVs),1 EV car,40-80 kg CO₂/kWh (battery production)
+Electric Vehicles (EVs),1 EV car (lifecycle emissions),10-50 g CO₂/km
+Green Hydrogen Production,1 kg of green hydrogen,0-5 kg CO₂
+Sustainable Agriculture (Lab-Grown Meat),1 kg of lab-grown beef,5-25 kg CO₂
+Sustainable Agriculture (Plant-Based Meat),1 kg of plant-based meat,2-5 kg CO₂
+Recycled Materials (Aluminum),1 kg of recycled aluminum,0.5-1.5 kg CO₂
+Sustainable Construction (Mass Timber),1m³ of mass timber,-500 to 50 kg CO₂
+Energy Storage (Lithium-Ion Batteries),1 kWh lithium-ion battery,50-100 kg CO₂/kWh
+Sustainable Fashion (Recycled Polyester),1 kg of recycled polyester,1-3 kg CO₂
+Sustainable Fashion (Organic Cotton),1 kg of organic cotton,1.5-4 kg CO₂
+Carbon Capture & Storage (CCS),1 ton of CO₂ captured,-800 to -1000 kg CO₂
+Bioenergy (Biogas),1 kWh of biogas,10-50 g CO₂/kWh
+Bioenergy (Biodiesel),1 liter of biodiesel,1-3 kg CO₂/liter
+Geothermal Energy,1 kWh of geothermal energy,10-40 g CO₂/kWh
+Wave & Tidal Energy,1 kWh of wave energy,5-30 g CO₂/kWh
+Sustainable Packaging (Biodegradable Plastic),1 kg of biodegradable plastic,0.5-3 kg CO₂
+Water Purification (Desalination with Renewable Energy),1m³ of desalinated water,0-2 kg CO₂
+Sustainable Aviation (Sustainable Aviation Fuel),1 liter of sustainable fuel,0.2-1 kg CO₂/liter
+Renewable Energy (Solar Panels),1m² Solar PV panel,20-70 kg CO₂/m²
+Renewable Energy (Wind Turbines),1 MW wind turbine,5-15 g CO₂/kWh
+Electric Vehicles (EVs),1 EV car,40-80 kg CO₂/kWh (battery production)
+Electric Vehicles (EVs),1 EV car (lifecycle emissions),10-50 g CO₂/km
+Green Hydrogen Production,1 kg of green hydrogen,0-5 kg CO₂
+Sustainable Agriculture (Lab-Grown Meat),1 kg of lab-grown beef,5-25 kg CO₂
+Sustainable Agriculture (Plant-Based Meat),1 kg of plant-based meat,2-5 kg CO₂
+Recycled Materials (Aluminum),1 kg of recycled aluminum,0.5-1.5 kg CO₂
+Sustainable Construction (Mass Timber),1m³ of mass timber,-500 to 50 kg CO₂
+Energy Storage (Lithium-Ion Batteries),1 kWh lithium-ion battery,50-100 kg CO₂/kWh
+Sustainable Fashion (Recycled Polyester),1 kg of recycled polyester,1-3 kg CO₂
+Sustainable Fashion (Organic Cotton),1 kg of organic cotton,1.5-4 kg CO₂
+Carbon Capture & Storage (CCS),1 ton of CO₂ captured,-800 to -1000 kg CO₂
+Bioenergy (Biogas),1 kWh of biogas,10-50 g CO₂/kWh
+Bioenergy (Biodiesel),1 liter of biodiesel,1-3 kg CO₂/liter
+Geothermal Energy,1 kWh of geothermal energy,10-40 g CO₂/kWh
+Wave & Tidal Energy,1 kWh of wave energy,5-30 g CO₂/kWh
+Sustainable Packaging (Biodegradable Plastic),1 kg of biodegradable plastic,0.5-3 kg CO₂
+Water Purification (Desalination with Renewable Energy),1m³ of desalinated water,0-2 kg CO₂
+Sustainable Aviation (Sustainable Aviation Fuel),1 liter of sustainable fuel,0.2-1 kg CO₂/liter
+Sustainable Shipping (Green Ammonia),1 kg of green ammonia,0-2 kg CO₂
+Sustainable Cement Production,1 ton of green cement,200-400 kg CO₂ (vs. 800-900 kg for conventional cement)
+Sustainable Batteries (Solid-State Batteries),1 kWh solid-state battery,20-50 kg CO₂/kWh
+Sustainable Data Centers (Renewable-Powered),1 kWh of data processing,0-10 g CO₂/kWh
+Circular Economy (Recycled Steel),1 kg of recycled steel,0.5-1.5 kg CO₂
+Smart Grids & Energy Efficiency,1 kWh saved by smart grids,-1000 g CO₂/kWh
+Green Electronics (Eco-Friendly Smartphones),1 smartphone,30-50 kg CO₂
+Sustainable Public Transport (Electric Buses),1 electric bus,50-100 g CO₂/km
+Vertical Farming,1 kg of vertically farmed produce,0.5-2 kg CO₂
+Ocean-Based Carbon Capture,1 ton of CO₂ removed,-1000 to -1200 kg CO₂2

@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
+import emailjs from "@emailjs/browser";
 
 import { useLocalSearchParams } from "expo-router";
 import { ProgressBar } from "react-native-paper";
@@ -257,6 +258,52 @@ const ProjectDetails = () => {
     }
   }, [name]);
 
+  const handleEmail = async (emailList) => {
+    setLoading(true);
+
+    const serviceID = "service_khesrrp";
+    const templateID = "template_63tblyc";
+    const publicKey = "oJmBKOHVFS2r-wETd";
+
+    try {
+      await Promise.all(
+        emailList.map(async (email) => {
+          return emailjs.send(
+            serviceID,
+            templateID,
+            {
+              from_name: "Founder XYZ",
+              to_name: "Investor",
+              from_email: email,
+              to_email: email,
+              message: `Dear ${name}, 
+
+I am pleased to inform you that our meeting has been successfully scheduled. I look forward to discussing our vision, growth plans, and how we can create meaningful value together. 
+
+Meeting Details:
+📅 Date: ${date},
+📍 Location: Online Link to be given on approval!
+
+Looking forward to our conversation.
+
+Best regards,  
+Founder XYZ`,
+            },
+            publicKey
+          );
+        })
+      );
+
+      alert("Meeting confirmation emails sent successfully!");
+      onClose(); // Close modal on success
+    } catch (error) {
+      console.error("Error sending email:", error);
+      alert("Failed to send meeting confirmation.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDislike = async () => {
     try {
       // Update the dislikes count
@@ -273,23 +320,40 @@ const ProjectDetails = () => {
       if (newScore < 50) {
         Alert.alert(
           "Low Satisfaction Score",
-          `The satisfaction score is now ${newScore.toFixed(1)}%, which is considered low.`
+          `The satisfaction score is now ${newScore.toFixed(
+            1
+          )}%, which is considered low.`
         );
-  
+
         // Call the refund API
-        const response = await fetch(`http://localhost:5002/refund/${project.name}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-  
-        const result = await response.json();
-  
+        const response = await fetch(
+          `http://localhost:5002/refund/${project.name}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const res = await fetch(
+          `https://piyanshu.app.n8n.cloud/webhook/8d8dd1ac-c475-4716-a578-0cca33b3183b`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        console.log(res);
+        // const result = await response.json();
+        if (!response) {
+          return Alert.alert("Refund Failed");
+        }
         if (response.ok) {
           Alert.alert("Refund Successful", result.message);
         } else {
-          Alert.alert("Refund Failed", result.message);
+          // Alert.alert("Refund Failed", result.message);
         }
       }
     } catch (error) {
