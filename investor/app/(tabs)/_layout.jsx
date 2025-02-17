@@ -87,7 +87,7 @@ export default function Layout() {
                   padding: 4, // Reduced padding to 4 from 6
                 }}
               >
-                <Ionicons name="leaf" color={color} size={22} />
+                <Ionicons name="briefcase" color={color} size={22} />
               </View>
             ),
             tabBarLabel: "Projects",
@@ -113,7 +113,7 @@ export default function Layout() {
                 <Ionicons name="trending-up" color={color} size={22} />
               </View>
             ),
-            tabBarLabel: "Investments",
+            tabBarLabel: "Community",
             headerShown: false,
           }}
         />
@@ -133,10 +133,10 @@ export default function Layout() {
                   padding: 4, // Reduced padding to 4 from 6
                 }}
               >
-                <Ionicons name="person" color={color} size={22} />
+                <Ionicons name="cart" color={color} size={22} />
               </View>
             ),
-            tabBarLabel: "Account",
+            tabBarLabel: "Products",
             headerShown: false,
           }}
         />
@@ -157,7 +157,7 @@ export default function Layout() {
                 <Ionicons name="trophy" color={color} size={22} />
               </View>
             ),
-            tabBarLabel: "Home",
+            tabBarLabel: "Rewards",
           }}
         />
       </Tabs>
